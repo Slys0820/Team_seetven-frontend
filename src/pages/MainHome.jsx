@@ -9,18 +9,15 @@ const Temp_style = styled.div`
   height: 100vh;
 `;
 
-function MainPage() {
+function MainHome() {
   const navigate = useNavigate();
   return (
     <>
       <Temp_style>
-        <h1>아직 빈 화면 입니다(현재 페이지: MainPage)</h1>
-        <div2>
-          <h3>Global style 변경 필요</h3>
-        </div2>
+        <h1>아직 빈 화면 입니다(현재 페이지: MainHome 메인 페이지)</h1>
       </Temp_style>
     </>
   );
 }
 
-export default MainPage;
+export default MainHome;
