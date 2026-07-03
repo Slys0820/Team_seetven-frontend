@@ -15,7 +15,7 @@ const MobileContainer = styled.div`
   }
 `;
 
-const HeaderStyle = styled.div`
+const HeaderStyle1 = styled.div`
   top: 0;
   width: 100%;
   height: 50px;
@@ -27,14 +27,42 @@ const HeaderStyle = styled.div`
   box-sizing: border-box;
   padding: 0 16px;
   position: relative;
+
+  h1 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin: 0;
+    color: #a0a0a0;
+  }
 `;
 
-export default function NavigateHeader({ title }) {
-  const navigate = useNavigate();
+const HeaderStyle2 = styled.div`
+  top: 0;
+  width: 100%;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: #d9d9d9;
+  box-sizing: border-box;
+  padding: 0 16px;
+  position: relative;
 
+  h1 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin: 0;
+    color: #000000;
+  }
+`;
+
+export default function HeaderComponent({ title, type }) {
+  const navigate = useNavigate();
+  const SelectedHeader = type === "type2" ? HeaderStyle2 : HeaderStyle1;
   return (
     <MobileContainer>
-      <HeaderStyle>
+      <SelectedHeader>
         {/* 왼쪽 뒤로가기 버튼 */}
         <span
           onClick={() => navigate(-1)} // 이전 페이지로 이동
@@ -50,17 +78,8 @@ export default function NavigateHeader({ title }) {
         </span>
 
         {/* 중앙 타이틀 */}
-        <h1
-          style={{
-            fontSize: "1.3rem",
-            fontWeight: "normal",
-            margin: 0,
-            color: "#a0a0a0",
-          }}
-        >
-          {title}
-        </h1>
-      </HeaderStyle>
+        <h1>{title}</h1>
+      </SelectedHeader>
     </MobileContainer>
   );
 }

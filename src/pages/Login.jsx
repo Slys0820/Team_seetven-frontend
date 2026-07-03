@@ -12,10 +12,10 @@ const Box = styled.div`
 
 const TitleImage = styled.div`
   img {
-    width: 10rem;
-    height: 2.9rem;
+    width: 40rem;
+    height: 10rem;
     object-fit: cover; /* 이미지가 찌그러지지 않고 비율에 맞게 채워지도록 방지 */
-    margin-bottom: 5rem;
+    margin-bottom: 0rem;
   }
 `;
 
@@ -102,7 +102,7 @@ function Login() {
     <>
       <Box>
         <TitleImage>
-          <img src="./logo192.png" alt="로고 이미지 들어갈 자리" />
+          <img src="./Logo.png" alt="로고 이미지 들어갈 자리" />
         </TitleImage>
         <InputBox
           type="email"
