@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import HeaderComponent from "../components/HeaderComponent";
 
-const Temp_style = styled.div`
+const Box = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -13,9 +14,9 @@ function SignUo() {
   const navigate = useNavigate();
   return (
     <>
-      <Temp_style>
-        <h1>아직 빈 화면 입니다(현재 페이지: SignUo 회원 가입 페이지)</h1>
-      </Temp_style>
+      <Box>
+        <HeaderComponent title="회원가입" type="type1"></HeaderComponent>
+      </Box>
     </>
   );
 }
