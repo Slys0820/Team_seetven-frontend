@@ -2,19 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-const MobileContainer = styled.div`
-  width: 100%;
-  max-width: 430px;
-  height: 100dvh;
-  background-color: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
 const HeaderStyle1 = styled.div`
   top: 0;
   width: 100%;
@@ -61,25 +48,23 @@ export default function HeaderComponent({ title, type }) {
   const navigate = useNavigate();
   const SelectedHeader = type === "type2" ? HeaderStyle2 : HeaderStyle1;
   return (
-    <MobileContainer>
-      <SelectedHeader>
-        {/* 왼쪽 뒤로가기 버튼 */}
-        <span
-          onClick={() => navigate(-1)} // 이전 페이지로 이동
-          style={{
-            cursor: "pointer",
-            position: "absolute",
-            left: "16px",
-            fontSize: "1.2rem",
-            fontWeight: "bold",
-          }}
-        >
-          &lt; {/* 부등호 기호 출력 */}
-        </span>
+    <SelectedHeader>
+      {/* 왼쪽 뒤로가기 버튼 */}
+      <span
+        onClick={() => navigate(-1)} // 이전 페이지로 이동
+        style={{
+          cursor: "pointer",
+          position: "absolute",
+          left: "16px",
+          fontSize: "1.2rem",
+          fontWeight: "bold",
+        }}
+      >
+        &lt; {/* 부등호 기호 출력 */}
+      </span>
 
-        {/* 중앙 타이틀 */}
-        <h1>{title}</h1>
-      </SelectedHeader>
-    </MobileContainer>
+      {/* 중앙 타이틀 */}
+      <h1>{title}</h1>
+    </SelectedHeader>
   );
 }
