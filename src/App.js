@@ -7,6 +7,7 @@ import SignUp from "./pages/SignUp";
 import MainHome from "./pages/MainHome";
 import Certifiacation from "./pages/Certifiaction";
 import Post from "./pages/Post";
+import WriteEnd from "./pages/WriteEnd";
 
 function App() {
   return (
