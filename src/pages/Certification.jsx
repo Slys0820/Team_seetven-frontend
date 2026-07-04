@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import HeaderComponent from "../components/HeaderComponent";
+import PurpleHeader from "../components/PurpleHeader";
 
 const Box = styled.div`
   display: flex;
@@ -71,13 +71,14 @@ const FileUploadBox = styled.label`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 3rem;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 10px;
+  height: 2.5rem;
+  border: 1.5px solid #cacaca;
+  border-radius: 8px;
   padding: 0 15px;
   box-sizing: border-box;
   cursor: pointer;
   margin-bottom: 8px;
+  flex-shrink: 0; //다른 요소에 의해 영향 x
 
   span {
     font-size: 0.85rem;
@@ -89,10 +90,10 @@ const FileUploadBox = styled.label`
   }
 `;
 
-// 보안 안내 문구 (자물쇠 아이콘 표시 구역)
+// 자물쇠 아이콘 표시 구역 부분
 const SecurityNotice = styled.p`
-  font-size: 0.75rem;
-  color: #666666;
+  font-size: 0.7rem;
+  color: #000000;
   width: 100%;
   text-align: left;
   margin: 0 0 25px 0;
@@ -150,19 +151,49 @@ const SubmitButton = styled.button`
   font-weight: bold;
   cursor: pointer;
   margin-top: 20px;
+  flex-shrink: 0; //다른 요소에 의해 영향 x
+
+  //비활성 상태
+  cursor: not-allowed;
+
+  //활성 상태
+  &.ready {
+    background-color: #7063e3;
+    box-shadow: 0 4px 10px rgba(129, 140, 248, 0.3);
+    cursor: pointer;
+  }
 `;
 
 function Certification() {
   const navigate = useNavigate();
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]; // 유저가 선택한 첫 번째 파일
+    if (file) {
+      setSelectedFile(file); // 파일이 있으면 상태에 저장
+    } else {
+      setSelectedFile(null); // 취소했으면 다시 null
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!selectedFile) return; // 파일이 없으면 실행 안 함
+
+    // 원래는 여기서 백엔드로 FormData를 보내는 API 통신을 하겠죠?
+    alert("서류 제출이 완료되었습니다!");
+
+    navigate("/"); // 여기 승인 대기중 페이지로 교체 해야 함
+  };
 
   return (
     <>
-      {/* 아까 만든 보라색/회색 스타일인 type2 매칭 */}
-      <HeaderComponent title="학교 인증" type="type1" />
+      <PurpleHeader title="학교 인증" type="type1" />
       <Box>
-        {/* 아이콘 (임시 방패 이모지 대체, 원하시면 이미지 태그로 변경) */}
-        <div style={{ width: "100%", display: "flex" }}>
-          <BadgeIcon>🛡️</BadgeIcon>
+        <div style={{ width: "100%", display: "flex", marginTop: "5rem" }}>
+          <BadgeIcon>
+            <img src="./security.png" />
+          </BadgeIcon>
         </div>
 
         <TitleArea>
@@ -179,27 +210,60 @@ function Certification() {
         <SubTitle>인증 서류 첨부</SubTitle>
 
         {/* 실제 파일 인풋은 숨기고 label로 커스텀 디자인 구현 */}
-        <input type="file" id="school-file" style={{ display: "none" }} />
+        <input
+          type="file"
+          id="school-file"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+
         <FileUploadBox htmlFor="school-file">
-          <span>사진 선택하기</span>
-          <span className="icon">🔗</span>
+          <span>{selectedFile ? selectedFile.name : "사진 선택하기"}</span>
+          <span className="icon">
+            <img
+              src="./link.png"
+              style={{ transform: "scale(0.9) translateY(2px)" }}
+              alt="링크 이미지"
+            />
+          </span>
         </FileUploadBox>
 
         <SecurityNotice>
-          🔒 입력하신 정보는 학생 신분 확인 용도로만 사용되며, 승인 후 즉시
-          파기됩니다.
+          <img src="lock2.png" /> 입력하신 정보는 학생 신분 확인 용도로만
+          사용되며, 승인 후 즉시 파기됩니다.
         </SecurityNotice>
 
         <InfoGuideBox>
-          <h4>ℹ️ [ 인증 서류 첨부 안내 ]</h4>
+          <h4>
+            <img
+              src="./alert.png"
+              style={{
+                transform: "scale(1.13)",
+                marginRight: "8px",
+                transform: "translateY(2px)",
+              }}
+            />
+            [ 인증 서류 첨부 안내 ]
+          </h4>
           <ul>
-            <li>✔️ 학생증 : 성명, 학교명, 학번, 사진이 포함된 앞면</li>
-            <li>✔️ 재학/휴학 증명서: 최근 1개월 이내에 발급된 서류</li>
-            <li>✔️ 포털 로그인 화면: 학교 로고와 이름이 함께 나오는 화면</li>
+            <li>
+              <img src="./check.png" /> 학생증 : 성명, 학교명, 학번, 사진이
+              포함된 앞면
+            </li>
+            <li>
+              <img src="./check.png" /> 재학/휴학 증명서: 최근 1개월 이내에
+              발급된 서류
+            </li>
+            <li>
+              <img src="./check.png" />
+              포털 로그인 화면: 학교 로고와 이름이 함께 나오는 화면
+            </li>
           </ul>
         </InfoGuideBox>
 
-        <SubmitButton>제출하기</SubmitButton>
+        <SubmitButton className={selectedFile ? "ready" : ""}>
+          제출하기
+        </SubmitButton>
       </Box>
     </>
   );
