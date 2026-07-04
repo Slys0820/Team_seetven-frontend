@@ -5,6 +5,7 @@ import TestPage from "./pages/TestPage";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import MainHome from "./pages/MainHome";
+import WriteEnd from "./pages/WriteEnd";
 
 function App() {
   return (
