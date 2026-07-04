@@ -158,7 +158,7 @@ function Certification() {
   return (
     <>
       {/* 아까 만든 보라색/회색 스타일인 type2 매칭 */}
-      <HeaderComponent title="학교 인증" type="type2" />
+      <HeaderComponent title="학교 인증" type="type1" />
       <Box>
         {/* 아이콘 (임시 방패 이모지 대체, 원하시면 이미지 태그로 변경) */}
         <div style={{ width: "100%", display: "flex" }}>

@@ -345,20 +345,26 @@ function Login() {
           <SignUpLink onClick={() => navigate("/signup")}>회원가입</SignUpLink>
 
           {/*  [개발용  임시 스타일] */}
-          {/* <DevAdminPanel>
-          <h4>🛠️ 해커톤 라우트 이동기 (개발 테스트용)</h4>
-          <div className="btn-group">
-            <button onClick={() => navigate("/main")}>🏠 메인</button>
-            <button onClick={() => navigate("/signup")}>📝 회원가입</button>
-            <button onClick={() => navigate("/auth")}>🛡️ 학교인증</button>
-            <button onClick={() => navigate("/post")}>📄 모집상세</button>
-          </div>
-          <div
-            style={{ fontSize: "0.65rem", color: "#9ca3af", marginTop: "8px" }}
-          >
-            * 계정: test@naver.com / 비밀번호: 1234
-          </div>
-        </DevAdminPanel> */}
+          <DevAdminPanel>
+            <h4>🛠️ 해커톤 라우트 이동기 (개발 테스트용)</h4>
+            <div className="btn-group">
+              <button onClick={() => navigate("/main")}>🏠 메인</button>
+              <button onClick={() => navigate("/signup")}>📝 회원가입</button>
+              <button onClick={() => navigate("/certification")}>
+                🛡️ 학교인증
+              </button>
+              <button onClick={() => navigate("/post")}>📄 모집상세</button>
+            </div>
+            <div
+              style={{
+                fontSize: "0.65rem",
+                color: "#9ca3af",
+                marginTop: "8px",
+              }}
+            >
+              * 계정: test@naver.com / 비밀번호: 1234
+            </div>
+          </DevAdminPanel>
         </FormContainer>
       </Box>
     </>
