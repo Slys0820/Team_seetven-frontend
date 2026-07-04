@@ -1,0 +1,70 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+
+const HeaderStyle1 = styled.div`
+  top: 0;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1.3px solid #a0a0a0;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  padding: 0 16px;
+  position: relative;
+
+  h1 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin: 0;
+    color: #a0a0a0;
+  }
+`;
+
+const HeaderStyle2 = styled.div`
+  top: 0;
+  width: 100%;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: #d9d9d9;
+  box-sizing: border-box;
+  padding: 0 16px;
+  position: relative;
+
+  h1 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin: 0;
+    color: #000000;
+  }
+`;
+
+export default function HeaderComponent({ title, type }) {
+  const navigate = useNavigate();
+  const SelectedHeader = type === "type2" ? HeaderStyle2 : HeaderStyle1;
+  return (
+    <SelectedHeader>
+      {/* 왼쪽 뒤로가기 버튼 */}
+      <span
+        onClick={() => navigate(-1)} // 이전 페이지로 이동
+        style={{
+          cursor: "pointer",
+          position: "absolute",
+          left: "16px",
+          fontSize: "1.2rem",
+          fontWeight: "bold",
+        }}
+      >
+        &lt; {/* 부등호 기호 출력 */}
+      </span>
+
+      {/* 중앙 타이틀 */}
+      <h1>{title}</h1>
+    </SelectedHeader>
+  );
+}
