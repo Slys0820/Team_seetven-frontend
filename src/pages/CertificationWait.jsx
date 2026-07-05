@@ -72,7 +72,7 @@ const FailGuideBox = styled.div`
 
   li {
     font-size: 0.75rem;
-    color: #666666;
+    color: #a6a6a6;
     margin-bottom: 4px;
     line-height: 1.4;
 
@@ -87,7 +87,7 @@ const RetryButton = styled.button`
   width: 100%;
   height: 3rem;
   background-color: #d1d1d6; /* 시안의 연한 회색 버튼 */
-  color: #111111;
+  color: #000000;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
@@ -140,9 +140,9 @@ function CertificationWait() {
           <FailGuideBox>
             <p>[인증 서류 첨부 안내]</p>
             <ul>
-              <li>• 학생증 : 성명, 학교명, 학번, 사진이 포함된 앞면</li>
-              <li>• 재학/휴학 증명서: 최근 1개월 이내에 발급된 서류</li>
-              <li>• 포털 로그인 화면: 학교 로고와 이름이 함께 나오는 화면</li>
+              <li>학생증 : 성명, 학교명, 학번, 사진이 포함된 앞면</li>
+              <li>재학/휴학 증명서: 최근 1개월 이내에 발급된 서류</li>
+              <li>포털 로그인 화면: 학교 로고와 이름이 함께 나오는 화면</li>
             </ul>
           </FailGuideBox>
 
