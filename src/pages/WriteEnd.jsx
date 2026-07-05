@@ -8,6 +8,7 @@ const Array = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
 const Circle = styled.div`
   border-radius: 100%;
   border: 1px solid black;
@@ -22,8 +23,9 @@ function WriteEnd() {
     <>
       <Array>
         <Circle>
-          <img src="\👣.png" alt="발자국" />
+          <img src="👣.png" alt="작성완료" />
         </Circle>
+
         <div>작성완료! </div>
         <div>나와 마음이 맞는 멋진 팀원들을 기다려 봐요.</div>
         <button onClick={() => navigate("/main")}> 홈으로 </button>
