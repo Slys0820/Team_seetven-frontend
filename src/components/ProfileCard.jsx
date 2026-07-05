@@ -74,11 +74,11 @@ const ProfileCard = ({ onClick, name, xClick }) => {
         {/* 📄 슬라이드 1: 김멋사 프로필 앞면 */}
         <SwiperSlide>
           <div className="card-container" style={cardStyle}>
-            <XButton src="X.png" alt="x버튼" onclick={xClick} />
+            <XButton src="X.png" alt="x버튼" onClick={xClick} />
 
             {/* 원형 프로필, 이름, 학과, 태그 등 구현 */}
             <Circle>
-              <img src="\user.png" alt="프로필 이미지" />
+              <img src="user.png" alt="프로필 이미지" />
             </Circle>
             <div className="avatar"></div>
             <h2>김멋사</h2>
@@ -92,7 +92,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
         <SwiperSlide>
           <div className="card-container" style={cardStyle}>
             {/* 자격증 및 수상이력, 자기소개 내용 구현 */}
-            <XButton src="X.png" alt="x버튼" onclick={xClick} />
+            <XButton src="X.png" alt="x버튼" onClick={xClick} />
             <h3>자격증 및 수상이력</h3>
             <p>컴퓨터활용능력 1급...</p>
             <h3>자기소개</h3>
