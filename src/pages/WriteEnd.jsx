@@ -9,12 +9,22 @@ const Array = styled.div`
   align-items: center;
 `;
 
+const Circle = styled.div`
+  border-radius: 100%;
+  border: 1px solid black;
+  padding: 50px;
+  align-items: center;
+  justify-content: center;
+`;
+
 function WriteEnd() {
   const navigate = useNavigate();
   return (
     <>
       <Array>
-        <img src="\end.png" alt="작성완료" />
+        <Circle>
+          <img src="👣.png" alt="작성완료" />
+        </Circle>
 
         <div>작성완료! </div>
         <div>나와 마음이 맞는 멋진 팀원들을 기다려 봐요.</div>
