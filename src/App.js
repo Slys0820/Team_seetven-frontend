@@ -5,7 +5,7 @@ import TestPage from "./pages/TestPage";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import MainHome from "./pages/MainHome";
-import Certifiacation from "./pages/Certifiaction";
+import Certification from "./pages/Certification";
 import Post from "./pages/Post";
 import WriteEnd from "./pages/WriteEnd";
 
@@ -20,7 +20,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/main" element={<MainHome />} />
             <Route path="/test" element={<TestPage />} />
-            <Route path="/certification" element={<Certifiacation />} />
+            <Route path="/certification" element={<Certification />} />
             <Route path="/post" element={<Post />} />
           </Routes>
         </AppLayout>
