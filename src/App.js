@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import MainHome from "./pages/MainHome";
 import WriteEnd from "./pages/WriteEnd";
+import ProfileCard from "./components/ProfileCard";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
       <BrowserRouter>
         <AppLayout>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<ProfileCard />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/main" element={<MainHome />} />
             <Route path="/test" element={<TestPage />} />
