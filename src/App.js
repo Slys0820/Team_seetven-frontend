@@ -8,6 +8,7 @@ import MainHome from "./pages/MainHome";
 import Certification from "./pages/Certification";
 import Post from "./pages/Post";
 import WriteEnd from "./pages/WriteEnd";
+import MakeProfileCard from "./pages/MakeProfileCard";
 
 function App() {
   return (
