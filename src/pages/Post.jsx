@@ -4,7 +4,7 @@ import styled from "styled-components";
 import PurpleHeader from "../components/PurpleHeader";
 import { DummyData } from "../data/DummyData";
 
-const Container = styled.div`
+const Box = styled.div`
   width: 100%;
   min-height: 100dvh;
   background-color: #ffffff;
@@ -20,10 +20,10 @@ const ContentBox = styled.div`
   flex-direction: column;
 `;
 
-// 기획·아이디어 태그 (연보라 배경 + 보라 글씨)
+// 카테고리 태그 (연보라 배경 + 보라 글씨)
 const CategoryTag = styled.span`
   background-color: #7063e3;
-  color: #ffffff;
+  color: #f6f5ff;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 6px 14px;
@@ -35,7 +35,7 @@ const CategoryTag = styled.span`
 const Title = styled.h2`
   font-size: 1.4rem;
   font-weight: 700;
-  color: #111111;
+  color: #000000;
   margin: 0 0 14px 0;
 `;
 
@@ -50,13 +50,13 @@ const MetaInfoRow = styled.div`
 
   .left-meta {
     display: flex;
-    gap: 12px;
+    gap: 5px;
     align-items: center;
   }
 
-  /* 시안의 오른쪽 보라색 통합 칩 */
+  /* 오른쪽 보라색 통합 칩 */
   .right-chip {
-    background-color: #f5f3ff;
+    background-color: #f2effc;
     padding: 6px 14px;
     border-radius: 8px;
     color: #7063e3;
@@ -67,12 +67,14 @@ const MetaInfoRow = styled.div`
   }
 `;
 
+// 글 정보, 내용 사이 회색 구분선
 const Divider = styled.hr`
   border: none;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e7eaf1;
   margin: 0 0 24px 0;
 `;
 
+// 모집정보, 내용 옆의 보라색 기둥
 const SectionTitle = styled.div`
   font-size: 1.1rem;
   font-weight: bold;
@@ -84,10 +86,10 @@ const SectionTitle = styled.div`
   align-items: center;
 `;
 
-// 모집 정보 테이블 테두리 (시안 특유의 연보라빛 테두리 적용)
+// 모집 정보, 내용 테두리
 const InfoTableBox = styled.div`
-  border: 1px solid #eef2ff;
-  box-shadow: 0px 2px 8px rgba(112, 99, 227, 0.04);
+  border: 1px solid #7063e3; /* 테두리*/
+  box-shadow: 0px 0px 2px 0px #7063e380; /*겉 그림자*/
   border-radius: 16px;
   padding: 10px 18px;
   display: flex;
@@ -96,79 +98,78 @@ const InfoTableBox = styled.div`
 `;
 
 const TableRow = styled.div`
+  /* [1. 행 전체 레이아웃] */
   display: flex;
   align-items: center;
   padding: 14px 0;
-  font-size: 0.85rem;
-  border-bottom: 1px solid #f8fafc;
+  font-size: 0.85rem; /* 이 행 안에서 쓰이는 기본 글자 크기를 설정합니다. */
+  border-bottom: 2px solid #e3e3e3; /* 행 밑에 연한 회색 구분선(두께 2px)을 긋습니다. */
 
   &:last-child {
-    border-bottom: none;
+    border-bottom: none; /* 맨 마지막 행(활동 목적)의 밑에는 구분선이 안 나오도록 지웁니다. */
   }
 
+  /* [3. 왼쪽 영역: 아이콘 + 제목 텍스트 묶음] */
   .label-group {
-    width: 110px;
-    color: #111111;
+    width: 110px; /* '지원 공고', '모집 분야' 등이 차지할 너비를 110px로 고정해서 세로 라인을 맞춥니다. */
+    color: #000000;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
   }
 
-  /* 시안 속 아이콘 원형 배경 원 */
+  /* [4. 아이콘을 감싸는 동그라미 배경] */
   .icon-bg {
-    width: 26px;
-    height: 26px;
-    background-color: #f5f3ff;
+    width: 2rem;
+    height: 2rem;
+    background-color: #f2f1fb;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #7063e3;
-    font-size: 0.8rem;
   }
 
+  /* [5. 오른쪽 영역: 백엔드에서 받아온 실제 내용 값] */
   .value {
     color: #111111;
     font-weight: 500;
-    flex: 1;
+    flex: 1; /* 남은 오른쪽 화면 영역을 혼자 꽉 채우도록(확장) 만듭니다. */
   }
 `;
 
-// ⭐️ 시안의 따옴표가 들어간 본문 내용 박스
+// 따옴표가 들어간 본문 내용 박스
 const ContentDetailBox = styled.div`
   border: 1px solid #eef2ff;
   border-radius: 16px;
-  padding: 32px 24px;
-  background-color: #fcfbfe;
-  position: relative;
-  font-size: 0.85rem;
-  color: #4b5563;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  padding: 12px 20px;
+  background-color: #f2f1fb;
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  margin-bottom: 16px;
 
-  /* 왼쪽 위 따옴표 */
-  &::before {
-    content: "“";
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    font-size: 2rem;
-    color: #7063e3;
-    font-family: serif;
-    font-weight: bold;
+  /* 시작 따옴표 왼쪽 정렬 */
+  .quote-start {
+    align-self: flex-start;
+    width: 2rem;
+    height: 2rem;
   }
 
-  /* 오른쪽 아래 따옴표 */
-  &::after {
-    content: "”";
-    position: absolute;
-    bottom: -10px;
-    right: 16px;
-    font-size: 2rem;
-    color: #7063e3;
-    font-family: serif;
-    font-weight: bold;
+  /* 본문 텍스트 스타일 */
+  .text-content {
+    font-size: 0.85rem;
+    color: #4b5563;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    padding: 0 12px;
+  }
+
+  /* 끝 따옴표 오른쪽 정렬 */
+  .quote-end {
+    align-self: flex-end;
+    width: 2rem;
+    height: 2rem;
   }
 `;
 
@@ -189,7 +190,7 @@ const FixedBottomBar = styled.div`
   z-index: 100;
 `;
 
-// 사각형 보관함/스크랩 버튼
+// 스크랩 버튼
 const BookmarkButton = styled.button`
   width: 54px;
   height: 54px;
@@ -209,7 +210,7 @@ const BookmarkButton = styled.button`
   }
 `;
 
-// 동글동글한 보라색 지원 버튼
+// 보라색 지원 버튼
 const ApplyButton = styled.button`
   flex: 1;
   height: 54px;
@@ -232,8 +233,6 @@ const ApplyButton = styled.button`
   }
 `;
 
-// ... 상단 Styled-components 스타일 영역은 동일 ...
-
 function Post() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -243,18 +242,18 @@ function Post() {
 
   if (!post) {
     return (
-      <Container>
+      <Box>
         <PurpleHeader title="모집 상세 정보" />
         <ContentBox>
           <p>존재하지 않거나 삭제된 게시글입니다.</p>
           <button onClick={() => navigate(-1)}>뒤로 가기</button>
         </ContentBox>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container>
+    <Box>
       <PurpleHeader title="모집 상세 정보" />
 
       <ContentBox>
@@ -267,13 +266,34 @@ function Post() {
         <MetaInfoRow>
           <div className="left-meta">
             {/* 🚀 데이터 연동: 닉네임, 날짜 */}
-            <span>👤 {post.nickname}</span>
-            <span>📅 {post.date}</span>
+            <span>
+              <img src="../person.svg" /> {post.nickname}
+            </span>
+            <span>•</span>
+            <span>
+              <img src="../calender.svg" /> {post.date}
+            </span>
           </div>
           <div className="right-chip">
-            <span>👁️ 조회수 120</span>
+            {/* ?? 0 (널 병합 연산자)를 붙여두면 데이터가 없을 때 알아서 0으로 예쁘게 뜹니다. */}
+            <span>
+              <img
+                src="../visibility.svg"
+                style={{ transform: "translateY(3px)" }}
+                alt="북마크"
+              />{" "}
+              조회수 {post.views ?? 0}
+            </span>
             <span>|</span>
-            <span>💜 스크랩 32</span>
+
+            <span>
+              <img
+                src="../favorite_border.svg"
+                style={{ transform: "translateY(3px)" }}
+                alt="북마크"
+              />{" "}
+              스크랩 {post.scraps ?? 0}
+            </span>
           </div>
         </MetaInfoRow>
 
@@ -283,7 +303,9 @@ function Post() {
         <InfoTableBox>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">📢</div>
+              <div className="icon-bg">
+                <img src="../speaker.svg" />
+              </div>
               <span>지원 공고</span>
             </div>
             {/* 🚀 데이터 연동 */}
@@ -291,7 +313,9 @@ function Post() {
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">⚙️</div>
+              <div className="icon-bg">
+                <img src="../layers.svg" />
+              </div>
               <span>모집 분야</span>
             </div>
             {/* 🚀 데이터 연동 */}
@@ -299,7 +323,9 @@ function Post() {
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">📅</div>
+              <div className="icon-bg">
+                <img src="../calender_check.svg" />
+              </div>
               <span>모집 마감일</span>
             </div>
             {/* 🚀 데이터 연동 */}
@@ -307,7 +333,9 @@ function Post() {
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">👥</div>
+              <div className="icon-bg">
+                <img src="../persons.svg" />
+              </div>
               <span>모집 인원</span>
             </div>
             {/* 🚀 데이터 연동 */}
@@ -315,7 +343,9 @@ function Post() {
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">🖥️</div>
+              <div className="icon-bg">
+                <img src="../desktop_mac.svg" />
+              </div>
               <span>활동 방식</span>
             </div>
             {/* 🚀 데이터 연동 */}
@@ -323,7 +353,9 @@ function Post() {
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">🚩</div>
+              <div className="icon-bg">
+                <img src="../flag.svg" />
+              </div>
               <span>활동 목적</span>
             </div>
             {/* 🚀 데이터 연동 */}
@@ -333,12 +365,31 @@ function Post() {
 
         <SectionTitle>내용</SectionTitle>
         {/* 🚀 데이터 연동: 본문 내용 */}
-        <ContentDetailBox>{post.content}</ContentDetailBox>
+        <InfoTableBox>
+          <ContentDetailBox>
+            {/* 시작 따옴표 이미지 */}
+            <img
+              src="../format_quote (2).svg"
+              className="quote-start"
+              alt="따옴표 시작"
+            />
+
+            {/* 본문 텍스트 */}
+            <div className="text-content">{post.content}</div>
+
+            {/* 끝 따옴표 이미지 */}
+            <img
+              src="../format_quote (1).svg"
+              className="quote-end"
+              alt="따옴표 끝"
+            />
+          </ContentDetailBox>
+        </InfoTableBox>
       </ContentBox>
 
       <FixedBottomBar>
         <BookmarkButton onClick={() => alert("보관함에 저장되었습니다!")}>
-          🔖
+          <img src="../bookmark.svg" />
         </BookmarkButton>
         <ApplyButton
           disabled={post.isClosed}
@@ -347,7 +398,7 @@ function Post() {
           {post.isClosed ? "모집 마감" : "지원하기"}
         </ApplyButton>
       </FixedBottomBar>
-    </Container>
+    </Box>
   );
 }
 

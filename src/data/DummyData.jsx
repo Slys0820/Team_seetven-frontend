@@ -1,5 +1,5 @@
 export const DummyData = [
-  // 1. 기획 카테고리 (기존 데이터 고도화)
+  // 1. 기획 카테고리
   {
     id: 1,
     category: "기획",
@@ -7,6 +7,8 @@ export const DummyData = [
     nickname: "김갱공",
     date: "26.07.01",
     isClosed: false,
+    views: 120, // 🚀 동적 데이터 추가
+    scraps: 32, // 🚀 동적 데이터 추가
     announcement: "2026년 청년 정책 아이디어 공모",
     dueDate: "2026.07.15 (화) 23:59",
     memberCount: "00명",
@@ -22,6 +24,8 @@ export const DummyData = [
     nickname: "아샷추",
     date: "26.07.05",
     isClosed: true,
+    views: 84, // 🚀 동적 데이터 추가
+    scraps: 12, // 🚀 동적 데이터 추가
     announcement: "제 2회 융합 스타트업 캠퍼스",
     dueDate: "2026.07.05 (토) 18:00",
     memberCount: "3명",
@@ -39,6 +43,8 @@ export const DummyData = [
     nickname: "아이디어맨",
     date: "26.07.06",
     isClosed: false,
+    views: 204, // 🚀 동적 데이터 추가
+    scraps: 56, // 🚀 동적 데이터 추가
     announcement: "2026 대기업 브랜드 숏폼 챌린지",
     dueDate: "2026.07.25 (토) 23:59",
     memberCount: "0명 (영상 편집 1명 필수)",
@@ -55,7 +61,9 @@ export const DummyData = [
     title: "공공데이터 활용 스마트시티 앱 개발 대회",
     nickname: "코딩지옥",
     date: "26.07.06",
-    isClosed: true,
+    isClosed: false,
+    views: 312, // 🚀 동적 데이터 추가
+    scraps: 89, // 🚀 동적 데이터 추가
     announcement: "제 5회 공공데이터 매시업 경진대회",
     dueDate: "2026.08.10 (월) 17:00",
     memberCount: "프론트 1명, 백엔드 1명",
@@ -73,6 +81,8 @@ export const DummyData = [
     nickname: "카피라이터",
     date: "26.07.06",
     isClosed: false,
+    views: 45, // 🚀 동적 데이터 추가
+    scraps: 7, // 🚀 동적 데이터 추가
     announcement: "경북 전통시장 브랜드 네이밍 공모",
     dueDate: "2026.07.20 (월) 23:59",
     memberCount: "1~2명",
