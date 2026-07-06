@@ -14,14 +14,25 @@ const CardWrapper = styled.div`
   position: relative;
 `;
 
-// 2. 왼쪽 프로필 이미지 구역
-const ProfileImage = styled.img`
-  width: 48px;
-  height: 48px;
+// 2. 왼쪽 프로필 이미지 구역 (바깥 원형 컨테이너)
+const ProfileWrapper = styled.div`
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
-  background-color: #e0e0ff; /* 이미지 없을 때 기본 배경색 */
-  object-fit: cover;
+  background-color: #e0e0ff; /* 이미지 없을 때의 기본 배경색 */
   margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* 💡 내부 이미지가 원을 절대 못 벗어나도록 방어 */
+  flex-shrink: 0; /* 💡 화면 줄어들어도 찌그러짐 방지 */
+`;
+
+// 안쪽 실제 이미지 속성
+const ActualImage = styled.img`
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
 `;
 
 // 3. 중앙 정보 구역 (이름 + 태그들)
@@ -79,7 +90,15 @@ function PersonInfo({ name, profileImg, tags = [], onCardClick }) {
   return (
     <CardWrapper>
       {/* 프로필 아바타 이미지 */}
-      <ProfileImage src={profileImg || "./user.png"} alt={`${name} 프로필`} />
+      <ProfileWrapper>
+        <ActualImage
+          src={profileImg || "./BasicProfile.svg"}
+          alt={`${name} 프로필`}
+          onError={(e) => {
+            e.target.src = "./BasicProfile.svg";
+          }}
+        />
+      </ProfileWrapper>
 
       {/* 이름 및 해시태그 목록 */}
       <InfoContent>
