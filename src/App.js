@@ -10,6 +10,9 @@ import Post from "./pages/Post";
 import WriteEnd from "./pages/WriteEnd";
 import MakeProfileCard from "./pages/MakeProfileCard";
 import NavigationBar from "./components/NavigationBar"; // 임포트 누락 방지!
+import CertificationWait from "./pages/CertificationWait";
+import WholePost from "./pages/WholePost";
+import Storage from "./pages/Storage";
 
 // 💡 1. 주소를 감시하고 레이아웃을 뿌려줄 실질적인 메인 컴포넌트
 function AppContent() {
@@ -28,7 +31,10 @@ function AppContent() {
         <Route path="/main" element={<MainHome />} />
         <Route path="/test" element={<TestPage />} />
         <Route path="/certification" element={<Certification />} />
-        <Route path="/post" element={<Post />} />
+        <Route path="/post/:id" element={<Post />} />
+        <Route path="/wait" element={<CertificationWait />} />
+        <Route path="/wholepost" element={<WholePost />} />
+        <Route path="/storage" element={<Storage />} />
       </Routes>
 
       {/* 💡 네비게이션 바가 존재하는 창에서는 네비게이션을 보여주기*/}
