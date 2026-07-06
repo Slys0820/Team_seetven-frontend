@@ -91,11 +91,11 @@ const ArrowIcon = styled.div`
 /**
  * @param {boolean} isClosed - 마감 여부 (true면 마감, false면 모집중)
  * @param {string} title - 글 제목
- * @param {string} nickname - 작성자 닉네임
+ * @param {string} name - 작성자 이름
  * @param {string} date - 작성 날짜
  * @param {function} onClick - 카드 클릭 시 실행할 함수 (상세 페이지 이동 등)
  */
-function PostInfo({ isClosed, title, nickname, date, onClick }) {
+function PostInfo({ isClosed, title, name, date, onClick }) {
   return (
     <CardWrapper onClick={onClick}>
       {/* 상단: 뱃지 및 제목 */}
@@ -113,7 +113,7 @@ function PostInfo({ isClosed, title, nickname, date, onClick }) {
             style={{ width: "14px", height: "14px", marginRight: "4px" }}
           />
         </span>
-        <span>{nickname}</span>
+        <span>{name}</span>
         <span>|</span>
         <span className="date">{date}</span>
       </BottomRow>
