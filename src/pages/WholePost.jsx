@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import PostInfo from "../components/PostInfo";
 import PurpleHeader from "../components/PurpleHeader";
+import { useNavigate } from "react-router-dom";
+
+import { DummyData } from "../data/DummyData";
 
 const Box = styled.div`
   width: 100%;
@@ -46,6 +49,8 @@ const PostListContainer = styled.div`
 `;
 
 function WholePost() {
+  const navigate = useNavigate();
+
   const categories = [
     "기획",
     "광고/마케팅",
@@ -56,45 +61,9 @@ function WholePost() {
   const [activeTab, setActiveTab] = useState("기획");
 
   // 🚀 백엔드에서 받아올 데이터 구조 시뮬레이션 (더미 데이터)
-  const dummyPosts = [
-    {
-      id: 1,
-      category: "기획",
-      isClosed: false,
-      title: "(더미 데이터)팀원 모집합니다.",
-      nickname: "닉네임",
-      date: "26.07.05",
-    },
-    {
-      id: 2,
-      category: "기획",
-      isClosed: true,
-      title: "(더미 데이터)마케팅 관심있는 신입생 모여라",
-      nickname: "깅갱공",
-      date: "26.07.05",
-    },
-    {
-      id: 3,
-      category: "기획",
-      isClosed: false,
-      title: "(더미 데이터)팀원 모집합니다~",
-      nickname: "아샷추",
-      date: "26.07.05",
-    },
-    {
-      id: 4,
-      category: "광고/마케팅",
-      isClosed: false,
-      title: "(더미 데이터)광고 공모전 나가실 분!",
-      nickname: "아이디어맨",
-      date: "26.07.06",
-    },
-  ];
 
   // 현재 선택된 탭(카테고리)에 해당하는 글들만 필터링
-  const filteredPosts = dummyPosts.filter(
-    (post) => post.category === activeTab
-  );
+  const filteredPosts = DummyData.filter((post) => post.category === activeTab);
 
   return (
     <Box>
@@ -122,7 +91,10 @@ function WholePost() {
               title={post.title}
               nickname={post.nickname}
               date={post.date}
-              onClick={() => console.log(`${post.id}번 글 클릭됨`)} // 링크 이동으로 변경
+              onClick={() => {
+                console.log(`${post.id}번 글 클릭됨`); // 임시 디버그 로그
+                navigate(`/post/${post.id}`); // 페이지 이동
+              }}
             />
           ))
         ) : (

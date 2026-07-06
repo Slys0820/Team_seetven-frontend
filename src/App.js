@@ -25,7 +25,7 @@ function App() {
             <Route path="/main" element={<MainHome />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/certification" element={<Certification />} />
-            <Route path="/post" element={<Post />} />
+            <Route path="/post/:id" element={<Post />} />
             <Route path="/wait" element={<CertificationWait />} />
             <Route path="/wholepost" element={<WholePost />} />
             <Route path="/storage" element={<Storage />} />

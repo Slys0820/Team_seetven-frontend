@@ -353,7 +353,7 @@ function Login() {
               <button onClick={() => navigate("/certification")}>
                 🛡️ 학교인증
               </button>
-              <button onClick={() => navigate("/post")}>📄 모집상세</button>
+              <button onClick={() => navigate("/wholepost")}>📄 전체 글</button>
             </div>
             <div
               style={{
