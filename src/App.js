@@ -9,6 +9,9 @@ import Certification from "./pages/Certification";
 import Post from "./pages/Post";
 import WriteEnd from "./pages/WriteEnd";
 import MakeProfileCard from "./pages/MakeProfileCard";
+import CertificationWait from "./pages/CertificationWait";
+import WholePost from "./pages/WholePost";
+import Storage from "./pages/Storage";
 
 function App() {
   return (
@@ -22,7 +25,10 @@ function App() {
             <Route path="/main" element={<MainHome />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/certification" element={<Certification />} />
-            <Route path="/post" element={<Post />} />
+            <Route path="/post/:id" element={<Post />} />
+            <Route path="/wait" element={<CertificationWait />} />
+            <Route path="/wholepost" element={<WholePost />} />
+            <Route path="/storage" element={<Storage />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>
