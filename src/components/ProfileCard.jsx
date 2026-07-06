@@ -77,9 +77,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
             <XButton src="X.png" alt="x버튼" onClick={xClick} />
 
             {/* 원형 프로필, 이름, 학과, 태그 등 구현 */}
-            <Circle>
-              <img src="user.png" alt="프로필 이미지" />
-            </Circle>
+            <Circle></Circle>
             <div className="avatar"></div>
             <h2>김멋사</h2>
             <p>경영학과 | 인천대학교 2학년</p>
