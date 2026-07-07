@@ -14,6 +14,7 @@ import CertificationWait from "./pages/CertificationWait";
 import WholePost from "./pages/WholePost";
 import Storage from "./pages/Storage";
 import AcceptEnd from "./pages/AcceptEnd";
+import WriteGather from "./pages/WriteGather";
 
 // 💡 1. 주소를 감시하고 레이아웃을 뿌려줄 실질적인 메인 컴포넌트
 function AppContent() {
@@ -29,7 +30,7 @@ function AppContent() {
     <AppLayout>
       {/* 알맹이 화면 영역, 주소는 여기다 추가하면 됨*/}
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<AcceptEnd />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/main" element={<MainHome />} />
         <Route path="/test" element={<TestPage />} />
@@ -38,6 +39,9 @@ function AppContent() {
         <Route path="/wait" element={<CertificationWait />} />
         <Route path="/wholepost" element={<WholePost />} />
         <Route path="/storage" element={<Storage />} />
+        <Route path="/writegather" element={<WriteGather />} />
+        <Route path="/writeend" element={<WriteEnd />} />
+        <Route path="/acceptend" element={<AcceptEnd />} />
       </Routes>
 
       {/* 💡 네비게이션 바가 존재하는 창에서는 네비게이션을 보여주기*/}

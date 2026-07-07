@@ -8,7 +8,7 @@ const BackGround = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  background-color: #ffffff;
+  background-color: #fdf9ff;
   box-sizing: border-box;
 `;
 
@@ -28,18 +28,19 @@ const SubmitButton = styled.button`
 
 // 메인 타이틀 및 서브 텍스트
 const Title = styled.h1`
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #7063e3;
-  margin-top: 20px;
-  margin-bottom: 10px;
+  font-size: 1.9rem;
+  color: #4e39f1;
+  font-weight: 770;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
 `;
 
 const SubText = styled.p`
-  font-size: 0.95rem;
-  color: #6b7280;
+  font-size: 0.85rem;
+  color: #828282;
+  font-weight: 550;
   text-align: center;
-  line-height: 1.5;
+  letter-spacing: -1px;
   margin-bottom: 24px;
 `;
 
@@ -121,6 +122,16 @@ const StepDesc = styled.div`
   font-size: 0.65rem;
   color: #9ca3af;
 `;
+const Icon = styled.img`
+  cursor: pointer;
+  transition: transform 0.1s ease; /* 부드럽게 변하도록 애니메이션 추가 */
+
+  &:active {
+    transform: scale(
+      0.93
+    ); /* 누를 때 살짝 작아짐 (0.98은 티가 잘 안 나서 0.93 추천!) */
+  }
+`;
 
 function AcceptEnd() {
   const navigate = useNavigate("");
@@ -138,14 +149,19 @@ function AcceptEnd() {
   return (
     <>
       <BackGround>
-        <img src="end.png" alt="완료" />
-        <Title>수락완료!</Title>
-        <SubText>이제 메일로 팀프로젝트의 첫걸음을 시작해 보세요.</SubText>
+        <img src="people.png" alt="완료" />
+        <Title>수락 완료!</Title>
+        <SubText>
+          이제 메일로 팀 프로젝트의 <br /> 첫 걸음을 시작해 보세요
+        </SubText>
 
         {/* 💡 이메일 복사 버튼 */}
         <EmailCopyButton onClick={handleCopyEmail}>
           {emailAddress}
-          <span className="icon">📋</span> {/* 임시 복사 아이콘 이모지 */}
+
+          <Icon src="Group 8.svg" alt="복사" />
+
+          {/* 임시 복사 아이콘 이모지 */}
         </EmailCopyButton>
 
         {/* 💡 하단 3단계 프로세스 영역 */}
