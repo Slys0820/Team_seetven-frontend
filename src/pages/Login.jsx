@@ -354,6 +354,7 @@ function Login() {
                 🛡️ 학교인증
               </button>
               <button onClick={() => navigate("/wholepost")}>📄 전체 글</button>
+              <button onClick={() => navigate("/storage")}> 보관함</button>
             </div>
             <div
               style={{

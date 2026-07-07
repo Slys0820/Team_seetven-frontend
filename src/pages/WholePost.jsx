@@ -12,6 +12,7 @@ const Box = styled.div`
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  position: relative; /* 플로팅 버튼의 기준점이 됨 */
 `;
 
 const TabBar = styled.div`
@@ -33,9 +34,9 @@ const TabBar = styled.div`
 const TabItem = styled.div`
   padding: 14px 0;
   font-size: 0.9rem;
-  font-weight: ${(props) => (props.active ? "bold" : "normal")};
-  color: ${(props) => (props.active ? "#7063e3" : "#9ca3af")};
-  border-bottom: ${(props) => (props.active ? "2px solid #7063e3" : "2px solid transparent")};
+  font-weight: ${(props) => (props.$active ? "bold" : "normal")};
+  color: ${(props) => (props.$active ? "#7063e3" : "#9ca3af")};
+  border-bottom: ${(props) => (props.$active ? "2px solid #7063e3" : "2px solid transparent")};
   cursor: pointer;
 `;
 
@@ -46,6 +47,36 @@ const PostListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-bottom: 100px; /* 💡 버튼이나 하단바와 카드가 겹쳐서 안 보이는 것 방지 여백 */
+`;
+
+const FloatingButton = styled.button`
+  position: fixed;
+  width: 5rem;
+  height: 5rem;
+  right: 20px; /* 우측 여백 */
+  bottom: 110px; /* 하단 탭바 위에 띄우기 위한 높이 조절 (상황에 맞게 픽셀 조절 가능) */
+  background-color: #7063e3;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0px 4px 10px rgba(112, 99, 227, 0.4); /* 예쁜 보라색 그림자 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99; /* 리스트 카드보다 위에 뜨도록 설정 */
+  transition: transform 0.2s ease, background-color 0.2s ease;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+
+  &:active {
+    background-color: #5b4ec7;
+    transform: scale(0.95); /* 클릭 시 살짝 작아지는 피드백 효과 */
+  }
+}
 `;
 
 function WholePost() {
@@ -57,6 +88,9 @@ function WholePost() {
     "과학/공학",
     "네이밍/슬로건",
     "경제/금융",
+    "영상/콘텐츠",
+    "문학/시나리오",
+    "기타",
   ];
   const [activeTab, setActiveTab] = useState("기획");
 
@@ -73,7 +107,7 @@ function WholePost() {
         {categories.map((category) => (
           <TabItem
             key={category}
-            active={activeTab === category}
+            $active={activeTab === category} /* 💡 $active로 전달 */
             onClick={() => setActiveTab(category)}
           >
             {category}
@@ -89,7 +123,7 @@ function WholePost() {
               key={post.id}
               isClosed={post.isClosed}
               title={post.title}
-              nickname={post.nickname}
+              name={post.name}
               date={post.date}
               onClick={() => {
                 console.log(`${post.id}번 글 클릭됨`); // 임시 디버그 로그
@@ -106,6 +140,17 @@ function WholePost() {
           </div>
         )}
       </PostListContainer>
+
+      {/* 🚀 우측 하단 플로팅 글쓰기 버튼 추가 */}
+      <FloatingButton
+        onClick={() => {
+          navigate("/");
+          alert("네비게이트 경로 수정 필요");
+        }}
+      >
+        {/* 퍼플헤더나 다른 곳에서 쓰던 펜/수정 아이콘 경로를 넣어주시면 됩니다 */}
+        <img src="../edit.svg" alt="글쓰기" />
+      </FloatingButton>
     </Box>
   );
 }

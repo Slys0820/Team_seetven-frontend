@@ -21,7 +21,9 @@ function AppContent() {
 
   // 하단 네비게이션 바를 숨기고 싶은 주소들
   const excludePaths = ["/signup", "/"];
-  const showNavBar = !excludePaths.includes(location.pathname);
+  const showNavBar =
+    !excludePaths.includes(location.pathname) &&
+    !location.pathname.startsWith("/post/"); //고정 주소에 포함되거나, 주소가 "/post/"로 시작하면 네비게이션 바 숨기기
 
   return (
     <AppLayout>
