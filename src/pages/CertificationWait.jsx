@@ -1,67 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+// ❌ 중복된 import React 문 제거 완료
 
-// 전체 화면 레이아웃 (이전 Box 디자인과 통일감 유지)
+// 전체 화면 레이아웃
 const Box = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* 중앙 정렬 */
   width: 100%;
   height: 100dvh;
-  padding: 0 20px 40px 20px;
+  padding: 0 24px 40px 24px;
   box-sizing: border-box;
 `;
 
-// 상단 이미지 영역 (발자국 등 들어갈 자리)
 const ImageArea = styled.div`
-  margin-bottom: 40px;
+  width: 20rem;
+  height: 20rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px; /* 임시 높이 지정 */
+  margin-bottom: 60px;
 
   img {
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 `;
 
-// 메인 타이틀
 const MainTitle = styled.h2`
-  font-size: 1.6rem;
-  font-weight: bold;
+  width: 95%;
+  font-size: 1.45rem;
+  font-weight: 800;
   color: #111111;
-  margin: 0 0 12px 0;
-  text-align: center;
+  margin: 0 0 10px 0;
+  text-align: left;
+
+  span.highlight {
+    color: #8072eb;
+  }
 `;
 
-// 서브 설명 문구
 const SubDescription = styled.p`
-  font-size: 0.85rem;
-  color: #a0a0a0;
-  margin: 0 0 30px 0;
-  text-align: center;
+  width: 95%;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #888888;
+  margin: 0 0 32px 0;
+  text-align: left;
   line-height: 1.4;
 `;
 
-// [인증 실패 전용] 안내사항 박스
 const FailGuideBox = styled.div`
   width: 100%;
-  background-color: #fcfcfc; /* 연한 회색 톤 */
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 15px;
+  background-color: #f5f3ff;
+  border-radius: 12px;
+  padding: 20px;
   box-sizing: border-box;
   text-align: left;
-  margin-bottom: auto; /* 버튼을 아래로 밀어내기 위함 */
+  margin-bottom: auto;
 
   p {
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: #555555;
-    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #8072eb;
+    margin: 0 0 12px 0;
   }
 
   ul {
@@ -72,9 +76,10 @@ const FailGuideBox = styled.div`
 
   li {
     font-size: 0.75rem;
-    color: #a6a6a6;
-    margin-bottom: 4px;
-    line-height: 1.4;
+    font-weight: 500;
+    color: #555555;
+    margin-bottom: 6px;
+    line-height: 1.5;
 
     &:last-child {
       margin-bottom: 0;
@@ -82,32 +87,38 @@ const FailGuideBox = styled.div`
   }
 `;
 
-// 재시도 버튼 (이전 SubmitButton 스타일 기반)
 const RetryButton = styled.button`
   width: 100%;
-  height: 3rem;
-  background-color: #d1d1d6; /* 시안의 연한 회색 버튼 */
-  color: #000000;
+  height: 48px;
+  background-color: #8072eb;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  margin-top: auto; /* 승인 대기 상태일 땐 여백으로 바닥 유지, 실패 상태일 땐 하단 고정 */
   flex-shrink: 0;
+
+  &:active {
+    background-color: #6c5edb;
+  }
 `;
 
 function CertificationWait() {
   const navigate = useNavigate();
 
-  // 🚀 백엔드 연동용 핵심 상태값
-  // "wait" : 승인 대기 중 화면
-  // "fail" : 인증 실패 화면
+  // "wait" : 승인 대기 중 / "fail" : 인증 실패 / "success" : 인증 성공
   const [status, setStatus] = useState("wait");
 
-  // 재시도 버튼 클릭 시 다시 인증 페이지로 이동
+  // 🚀 1. 여기서 status가 "success"가 되는 순간 캐치해서 다른 페이지로 바로 쏴버립니다.
+  useEffect(() => {
+    if (status === "success") {
+      navigate("/makeprofilecard"); // 원하는 경로 설정 완료!
+    }
+  }, [status, navigate]);
+
   const handleRetry = () => {
-    navigate("/certification"); // 실제 인증 페이지 경로에 맞게 수정하세요!
+    navigate("/certification");
   };
 
   return (
@@ -116,7 +127,6 @@ function CertificationWait() {
       {status === "wait" && (
         <>
           <ImageArea style={{ marginTop: "auto" }}>
-            {/* 발자국 이미지 들어올 자리 (src 비워둠) */}
             <img src="./steps.png" alt="발자국 이미지" />
           </ImageArea>
 
@@ -130,8 +140,12 @@ function CertificationWait() {
       {/* 2. 인증 실패 상태 UI */}
       {status === "fail" && (
         <>
-          <MainTitle style={{ marginTop: "auto" }}>
-            인증에 실패했어요...
+          <ImageArea style={{ marginTop: "auto" }}>
+            <img src="./fail.svg" alt="인증 실패 그래픽" />
+          </ImageArea>
+
+          <MainTitle>
+            인증에 <span className="highlight">실패</span>했어요...
           </MainTitle>
           <SubDescription>
             필수로 인증해야 하는 항목을 다시 확인해 주세요.
