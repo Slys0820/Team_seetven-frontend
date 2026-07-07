@@ -59,7 +59,7 @@ const NavigationBar = () => {
         <Icon
           activeSrc="PHome.png"
           inactiveSrc="Home.png"
-          isActive={["/main"].includes(location.pathname)}
+          isActive={["/main"].includes(location.pathname)} // []안에 포함된 주소들에서 보랴색이됨
           name="홈"
           movePath={"/main"}
         />
