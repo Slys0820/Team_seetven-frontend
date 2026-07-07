@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import PurpleHeader from "../components/PurpleHeader";
 import { DummyData } from "../data/DummyData";
 
-const Container = styled.div`
+const Box = styled.div`
   width: 100%;
   min-height: 100dvh;
   background-color: #ffffff;
@@ -20,59 +20,49 @@ const ContentBox = styled.div`
   flex-direction: column;
 `;
 
-// 기획·아이디어 태그 (연보라 배경 + 보라 글씨)
+// 카테고리 태그 (연보라 배경 + 보라 글씨)
 const CategoryTag = styled.span`
   background-color: #7063e3;
-  color: #ffffff;
+  color: #f6f5ff;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 6px 14px;
   border-radius: 20px;
   align-self: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 `;
 
 const Title = styled.h2`
   font-size: 1.4rem;
   font-weight: 700;
-  color: #111111;
+  color: #000000;
   margin: 0 0 14px 0;
 `;
 
-// 메타 정보 영역 (조회수/스크랩 칩 포함)
+// 메타 정보 영역
 const MetaInfoRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
   color: #9ca3af;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .left-meta {
     display: flex;
-    gap: 12px;
+    gap: 5px;
     align-items: center;
-  }
-
-  /* 시안의 오른쪽 보라색 통합 칩 */
-  .right-chip {
-    background-color: #f5f3ff;
-    padding: 6px 14px;
-    border-radius: 8px;
-    color: #7063e3;
-    font-weight: 500;
-    display: flex;
-    gap: 10px;
-    font-size: 0.75rem;
   }
 `;
 
+// 글 정보, 내용 사이 회색 구분선
 const Divider = styled.hr`
   border: none;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid #e7eaf1;
   margin: 0 0 24px 0;
 `;
 
+// 모집정보, 내용 옆의 보라색 기둥
 const SectionTitle = styled.div`
   font-size: 1.1rem;
   font-weight: bold;
@@ -84,10 +74,10 @@ const SectionTitle = styled.div`
   align-items: center;
 `;
 
-// 모집 정보 테이블 테두리 (시안 특유의 연보라빛 테두리 적용)
+// 모집 정보, 내용 테두리
 const InfoTableBox = styled.div`
-  border: 1px solid #eef2ff;
-  box-shadow: 0px 2px 8px rgba(112, 99, 227, 0.04);
+  border: 1px solid #7063e3; /* 테두리*/
+  box-shadow: 0px 0px 2px 0px #7063e380; /*겉 그림자*/
   border-radius: 16px;
   padding: 10px 18px;
   display: flex;
@@ -100,7 +90,7 @@ const TableRow = styled.div`
   align-items: center;
   padding: 14px 0;
   font-size: 0.85rem;
-  border-bottom: 1px solid #f8fafc;
+  border-bottom: 2px solid #e3e3e3;
 
   &:last-child {
     border-bottom: none;
@@ -108,24 +98,21 @@ const TableRow = styled.div`
 
   .label-group {
     width: 110px;
-    color: #111111;
+    color: #000000;
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
   }
 
-  /* 시안 속 아이콘 원형 배경 원 */
   .icon-bg {
-    width: 26px;
-    height: 26px;
-    background-color: #f5f3ff;
+    width: 2rem;
+    height: 2rem;
+    background-color: #f2f1fb;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #7063e3;
-    font-size: 0.8rem;
   }
 
   .value {
@@ -133,46 +120,48 @@ const TableRow = styled.div`
     font-weight: 500;
     flex: 1;
   }
+
+  .link {
+    color: #7063e3;
+    text-decoration: underline;
+    word-break: break-all;
+    cursor: pointer;
+  }
 `;
 
-// ⭐️ 시안의 따옴표가 들어간 본문 내용 박스
+// 따옴표가 들어간 본문 내용 박스
 const ContentDetailBox = styled.div`
   border: 1px solid #eef2ff;
   border-radius: 16px;
-  padding: 32px 24px;
-  background-color: #fcfbfe;
-  position: relative;
-  font-size: 0.85rem;
-  color: #4b5563;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  padding: 12px 20px;
+  background-color: #f2f1fb;
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  margin-bottom: 16px;
 
-  /* 왼쪽 위 따옴표 */
-  &::before {
-    content: "“";
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    font-size: 2rem;
-    color: #7063e3;
-    font-family: serif;
-    font-weight: bold;
+  .quote-start {
+    align-self: flex-start;
+    width: 2rem;
+    height: 2rem;
   }
 
-  /* 오른쪽 아래 따옴표 */
-  &::after {
-    content: "”";
-    position: absolute;
-    bottom: -10px;
-    right: 16px;
-    font-size: 2rem;
-    color: #7063e3;
-    font-family: serif;
-    font-weight: bold;
+  .text-content {
+    font-size: 0.85rem;
+    color: #4b5563;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    padding: 0 12px;
+  }
+
+  .quote-end {
+    align-self: flex-end;
+    width: 2rem;
+    height: 2rem;
   }
 `;
 
-// 하단 고정 바
+// 🚀 하단 고정 바 수정 (북마크가 빠져서 간격 제거 및 가로 패딩 유지)
 const FixedBottomBar = styled.div`
   position: fixed;
   bottom: 0;
@@ -183,97 +172,118 @@ const FixedBottomBar = styled.div`
   border-top: 1px solid #f3f4f6;
   display: flex;
   align-items: center;
-  padding: 0 20px 12px 20px; /* 아래쪽 여백 살짝 줌 */
-  gap: 14px;
+  padding: 0 20px 12px 20px;
   box-sizing: border-box;
   z-index: 100;
 `;
 
-// 사각형 보관함/스크랩 버튼
-const BookmarkButton = styled.button`
-  width: 54px;
+// 🚀 전체 너비를 꽉 채우는 단독 지원 버튼 (시안 이미지 규격 반영)
+const FullApplyButton = styled.button`
+  width: 100%;
   height: 54px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background-color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  color: #7063e3;
-  transition: all 0.2s;
-
-  &:active {
-    background-color: #f9fafb;
-  }
-`;
-
-// 동글동글한 보라색 지원 버튼
-const ApplyButton = styled.button`
-  flex: 1;
-  height: 54px;
-  background-color: #7063e3;
+  background-color: ${(props) => (props.disabled ? "#d1d5db" : "#7063e3")}; /* 마감/신청완료 시 회색 변환 */
   color: white;
   border: none;
   border-radius: 14px;
   font-size: 0.95rem;
   font-weight: bold;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   transition: all 0.2s;
 
-  &:active {
+  &:not(:disabled):active {
     background-color: #5b4ec7;
   }
-
-  &:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-  }
 `;
-
-// ... 상단 Styled-components 스타일 영역은 동일 ...
 
 function Post() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // 통합 보관소에서 데이터 매칭
-  const post = DummyData.find((p) => p.id === Number(id));
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // 🚀 한 번 지원하면 고정되는 상태 정의
+  const [isApplied, setIsApplied] = useState(false);
+
+  useEffect(() => {
+    const fetchPostData = async () => {
+      setLoading(true);
+      try {
+        const serverData = DummyData.find((p) => p.id === Number(id));
+
+        if (serverData) {
+          setPost(serverData);
+          // 나중에 백엔드와 연동 시 유저가 기지원한 글인지 여부도 이곳에서 세팅 가능합니다.
+          setIsApplied(serverData.isApplied ?? false);
+        } else {
+          setPost(null);
+        }
+      } catch (error) {
+        console.error("데이터 로딩 실패:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPostData();
+  }, [id]);
+
+  // 🚀 지원하기 클릭 핸들러 (취소 불가 안내 및 상태 잠금)
+  const handleApplyClick = () => {
+    if (
+      window.confirm("정말 지원하시겠습니까? 지원한 후에는 취소할 수 없습니다.")
+    ) {
+      setIsApplied(true);
+      alert("지원이 완료되었습니다!");
+      // [TODO] 백엔드 지원 통신 API 연동할 곳
+      // await axios.post(`/api/posts/${id}/apply`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box>
+        <PurpleHeader title="모집 상세 정보" />
+        <ContentBox>
+          <p
+            style={{ textAlign: "center", color: "#7063e3", marginTop: "40px" }}
+          >
+            데이터 불러오는 중입니다...
+          </p>
+        </ContentBox>
+      </Box>
+    );
+  }
 
   if (!post) {
     return (
-      <Container>
+      <Box>
         <PurpleHeader title="모집 상세 정보" />
         <ContentBox>
           <p>존재하지 않거나 삭제된 게시글입니다.</p>
           <button onClick={() => navigate(-1)}>뒤로 가기</button>
         </ContentBox>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container>
+    <Box>
       <PurpleHeader title="모집 상세 정보" />
 
       <ContentBox>
-        {/* 🚀 데이터 연동: 카테고리 */}
         <CategoryTag>{post.category} • 아이디어</CategoryTag>
-
-        {/* 🚀 데이터 연동: 제목 */}
         <Title>{post.title}</Title>
 
         <MetaInfoRow>
           <div className="left-meta">
-            {/* 🚀 데이터 연동: 닉네임, 날짜 */}
-            <span>👤 {post.nickname}</span>
-            <span>📅 {post.date}</span>
-          </div>
-          <div className="right-chip">
-            <span>👁️ 조회수 120</span>
-            <span>|</span>
-            <span>💜 스크랩 32</span>
+            <span>
+              <img src="../person.svg" alt="유저" /> {post.name}
+            </span>
+            <span>•</span>
+            <span>
+              <img src="../calender.svg" alt="날짜" /> {post.date}
+            </span>
           </div>
         </MetaInfoRow>
 
@@ -283,71 +293,95 @@ function Post() {
         <InfoTableBox>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">📢</div>
+              <div className="icon-bg">
+                <img src="../speaker.svg" alt="공고" />
+              </div>
               <span>지원 공고</span>
             </div>
-            {/* 🚀 데이터 연동 */}
-            <div className="value">{post.announcement}</div>
+            <a
+              className="link"
+              href={post.announcement}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {post.announcement}
+            </a>
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">⚙️</div>
+              <div className="icon-bg">
+                <img src="../layers.svg" alt="분야" />
+              </div>
               <span>모집 분야</span>
             </div>
-            {/* 🚀 데이터 연동 */}
             <div className="value">{post.category}·아이디어</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">📅</div>
+              <div className="icon-bg">
+                <img src="../calender_check.svg" alt="마감일" />
+              </div>
               <span>모집 마감일</span>
             </div>
-            {/* 🚀 데이터 연동 */}
             <div className="value">{post.dueDate}</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">👥</div>
+              <div className="icon-bg">
+                <img src="../persons.svg" alt="인원" />
+              </div>
               <span>모집 인원</span>
             </div>
-            {/* 🚀 데이터 연동 */}
             <div className="value">{post.memberCount}</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">🖥️</div>
+              <div className="icon-bg">
+                <img src="../desktop_mac.svg" alt="방식" />
+              </div>
               <span>활동 방식</span>
             </div>
-            {/* 🚀 데이터 연동 */}
             <div className="value">{post.method}</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
-              <div className="icon-bg">🚩</div>
+              <div className="icon-bg">
+                <img src="../flag.svg" alt="목적" />
+              </div>
               <span>활동 목적</span>
             </div>
-            {/* 🚀 데이터 연동 */}
             <div className="value">{post.purpose}</div>
           </TableRow>
         </InfoTableBox>
 
         <SectionTitle>내용</SectionTitle>
-        {/* 🚀 데이터 연동: 본문 내용 */}
-        <ContentDetailBox>{post.content}</ContentDetailBox>
+        <InfoTableBox>
+          <ContentDetailBox>
+            <img
+              src="../format_quote (2).svg"
+              className="quote-start"
+              alt="따옴표 시작"
+            />
+            <div className="text-content">{post.content}</div>
+            <img
+              src="../format_quote (1).svg"
+              className="quote-end"
+              alt="따옴표 끝"
+            />
+          </ContentDetailBox>
+        </InfoTableBox>
       </ContentBox>
 
+      {/* 🚀 개편된 단독 하단 바 영역 */}
       <FixedBottomBar>
-        <BookmarkButton onClick={() => alert("보관함에 저장되었습니다!")}>
-          🔖
-        </BookmarkButton>
-        <ApplyButton
-          disabled={post.isClosed}
-          onClick={() => alert("지원이 완료되었습니다!")}
+        <FullApplyButton
+          disabled={post.isClosed || isApplied} // 모집 마감되었거나 이미 지원했으면 비활성화
+          onClick={handleApplyClick}
         >
-          {post.isClosed ? "모집 마감" : "지원하기"}
-        </ApplyButton>
+          {post.isClosed ? "모집 마감" : isApplied ? "지원 완료" : "지원하기"}
+        </FullApplyButton>
       </FixedBottomBar>
-    </Container>
+    </Box>
   );
 }
 
