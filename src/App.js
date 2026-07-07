@@ -19,7 +19,7 @@ function AppContent() {
   const location = useLocation(); // 이제 <BrowserRouter> 내부이므로 정상 작동합니다!
 
   // 하단 네비게이션 바를 숨기고 싶은 주소들
-  const excludePaths = ["/signup", "/"];
+  const excludePaths = ["/signup", "/", "/wait"];
   const showNavBar =
     !excludePaths.includes(location.pathname) &&
     !location.pathname.startsWith("/post/"); //고정 주소에 포함되거나, 주소가 "/post/"로 시작하면 네비게이션 바 숨기기
@@ -37,6 +37,7 @@ function AppContent() {
         <Route path="/wait" element={<CertificationWait />} />
         <Route path="/wholepost" element={<WholePost />} />
         <Route path="/storage" element={<Storage />} />
+        <Route path="/makeprofilecard" element={<MakeProfileCard />} />
       </Routes>
 
       {/* 💡 네비게이션 바가 존재하는 창에서는 네비게이션을 보여주기*/}
