@@ -13,6 +13,7 @@ import NavigationBar from "./components/NavigationBar"; // 임포트 누락 방�
 import CertificationWait from "./pages/CertificationWait";
 import WholePost from "./pages/WholePost";
 import Storage from "./pages/Storage";
+import AcceptEnd from "./pages/AcceptEnd";
 
 // 💡 1. 주소를 감시하고 레이아웃을 뿌려줄 실질적인 메인 컴포넌트
 function AppContent() {
