@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import PostInfo from "../components/PostInfo";
 import PurpleHeader from "../components/PurpleHeader";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { DummyData } from "../data/DummyData";
 
@@ -81,6 +81,10 @@ const FloatingButton = styled.button`
 
 function WholePost() {
   const navigate = useNavigate();
+  const location = useLocation(); // 💡 라우터 state를 읽기 위한 훅 선언
+
+  // 💡 메인에서 넘겨받은 categoryName이 있으면 그걸 초기값으로 쓰고, 없으면 기본값인 "기획"을 씁니다.
+  const initialTab = location.state?.categoryName || "기획";
 
   const categories = [
     "기획",
@@ -92,7 +96,9 @@ function WholePost() {
     "문학/시나리오",
     "기타",
   ];
-  const [activeTab, setActiveTab] = useState("기획");
+
+  // 💡 초기값 상태에 initialTab을 쏙 넣어줍니다
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   // 🚀 백엔드에서 받아올 데이터 구조 시뮬레이션 (더미 데이터)
 

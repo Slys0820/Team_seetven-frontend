@@ -30,7 +30,7 @@ function AppContent() {
     <AppLayout>
       {/* 알맹이 화면 영역, 주소는 여기다 추가하면 됨*/}
       <Routes>
-        <Route path="/" element={<AcceptEnd />} />
+        <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/main" element={<MainHome />} />
         <Route path="/test" element={<TestPage />} />
