@@ -54,9 +54,9 @@ const BackButton = styled.div`
 
 export default function PurpleHeader({ title, root }) {
   const navigate = useNavigate();
+
   return (
     <HeaderStyle>
-      {/* 왼쪽 뒤로가기 버튼 */}
       <SetRayout>
         <BackButton
           onClick={() => navigate(root)} // 이전 페이지로 이동

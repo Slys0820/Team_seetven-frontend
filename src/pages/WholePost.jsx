@@ -65,7 +65,9 @@ const FloatingButton = styled.button`
   justify-content: center;
   cursor: pointer;
   z-index: 99; /* 리스트 카드보다 위에 뜨도록 설정 */
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 
   img {
     width: 24px;
@@ -76,7 +78,6 @@ const FloatingButton = styled.button`
     background-color: #5b4ec7;
     transform: scale(0.95); /* 클릭 시 살짝 작아지는 피드백 효과 */
   }
-}
 `;
 
 function WholePost() {

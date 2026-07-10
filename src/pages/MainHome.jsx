@@ -67,8 +67,10 @@ const SearchBarContainer = styled.div`
   right: 24px;
   bottom: -24px;
   height: 48px;
-  background-color: #ffffff;
-  border-radius: 12px;
+  background-color: #f6f5ff;
+  border-radius: 8px;
+  border: 1.3px solid #c6c6c6;
+
   display: flex; /* 내부 input과 돋보기를 가로 배치하기 위해 다시 활성화 */
   align-items: center; /* 세로 중앙 정렬 */
   padding: 0 16px;
@@ -80,6 +82,8 @@ const SearchBarContainer = styled.div`
 const SearchInput = styled.input`
   font-size: 0.85rem;
   color: #111111; /* 사용자가 입력할 때 써지는 글자 색상 */
+  background: #f6f5ff;
+
   flex: 1; /* 돋보기 아이콘을 우측 끝으로 밀어내고 남은 공간을 꽉 채웁니다 */
   border: none; /* input 기본 테두리 제거 */
   outline: none; /* 클릭(포커스)했을 때 생기는 파란 테두리 제거 */
@@ -124,12 +128,12 @@ const IconBox = styled.div`
   width: 100%; /* 그리드 한 칸 너비를 꽉 채움 */
   aspect-ratio: 1/1; /* 무조건 정사각형 유지 */
   background-color: #ffffff;
-  border: 1px solid #f0f0f8;
+  border: none;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  box-shadow: 0px 0px 3px 0px #6c59d4;
 `;
 
 // 4. 💡 [추가] 박스 밑에 붙을 글자 스타일 (기존 텍스트 속성 이관)
