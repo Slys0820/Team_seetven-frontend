@@ -21,7 +21,8 @@ const PageWrapper = styled.div`
 
 const Box = styled.div`
   background-color: #ffffff;
-  border: 1.5px solid #9f96eb;
+  box-shadow: 0px 0px 2px 0px #7063e3;
+  border: none;
   border-radius: 8px;
   width: 90%;
   margin-top: 10px;
@@ -178,11 +179,12 @@ function SignUp() {
 
   // 1. 입력값 상태들
   const [name, setName] = useState("");
-  const [email, setEmail] = useState(""); // ◀ [복구] 이메일 상태 추가
-  const [birth, setBirth] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
   const [school, setSchool] = useState("");
   const [major, setMajor] = useState("");
+  const [grade, setGrade] = useState(""); // ◀ 학년 상태
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
 
@@ -195,15 +197,16 @@ function SignUp() {
     const hasSpace = (text) => /\s/.test(text);
     const isKoreanOrEnglish = (text) => /^[a-zA-Z가-힣]+$/.test(text);
     const birthRegex = /^\d{4}\/\d{2}\/\d{2}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 이메일 형식 검사용 정규식
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // 아무것도 입력 안 했을 때는 에러 메시지 비우기
     if (
       !name &&
       !email &&
-      !birth &&
+      !birthDate &&
       !school &&
       !major &&
+      !grade && // ◀ 추가
       !password &&
       !passwordCheck
     ) {
@@ -223,7 +226,7 @@ function SignUp() {
       }
     }
 
-    // 2. 이메일 검사 (추가)
+    // 2. 이메일 검사
     if (email) {
       if (hasSpace(email)) {
         setErrorMessage("이메일에는 공백을 입력할 수 없습니다.");
@@ -238,8 +241,8 @@ function SignUp() {
     }
 
     // 3. 생년월일 검사
-    if (birth) {
-      if (!birthRegex.test(birth)) {
+    if (birthDate) {
+      if (!birthRegex.test(birthDate)) {
         setErrorMessage("생년월일은 YYYY/MM/DD 형식으로 입력해야 합니다.");
         setIsFormValid(false);
         return;
@@ -258,7 +261,20 @@ function SignUp() {
       return;
     }
 
-    // 5. 비밀번호 검사
+    // 📌 [신규] 5. 학년 예외 처리 방어막
+    if (grade) {
+      // 숫자만 추출해내기 (유저가 '1' 또는 '1학년'이라고 쳐도 숫자만 발라냄)
+      const numericGrade = parseInt(grade.replace(/[^0-9]/g, ""), 10);
+
+      // 숫자가 전혀 없거나, 1~4 범위를 벗어나면 컷트
+      if (isNaN(numericGrade) || numericGrade < 1 || numericGrade > 4) {
+        setErrorMessage("학년은 1학년부터 4학년까지만 입력 가능합니다.");
+        setIsFormValid(false);
+        return;
+      }
+    }
+
+    // 6. 비밀번호 검사
     if (password) {
       if (hasSpace(password)) {
         setErrorMessage("비밀번호에는 공백을 입력할 수 없습니다.");
@@ -279,14 +295,15 @@ function SignUp() {
       return;
     }
 
-    // 6. 모든 내용 입력 시 버튼 활성화 확인 (email 조건 추가)
+    // 7. 모든 내용 입력 시 버튼 활성화 확인 (grade 조건 추가)
     if (
       name &&
       email &&
-      birth &&
+      birthDate &&
       gender &&
       school &&
       major &&
+      grade && // ◀ 필수 조건에 추가
       password &&
       passwordCheck
     ) {
@@ -296,29 +313,40 @@ function SignUp() {
       setIsFormValid(false);
       setErrorMessage("");
     }
-  }, [name, email, birth, gender, school, major, password, passwordCheck]);
+  }, [
+    name,
+    email,
+    birthDate,
+    gender,
+    school,
+    major,
+    grade,
+    password,
+    passwordCheck,
+  ]); // ◀ 의존성 배열에 grade 추가
 
   const handleSubmit = (e) => {
-    e.preventDefault(); //브라우저 새로고침 현상 방지
+    e.preventDefault();
     if (!isFormValid) return;
 
-    // 버그 확인용 임시 코드, 디버그
+    // 백엔드로 보낼 때는 안전하게 숫자(Number) 타입으로 가공해서 보냅니다.
+    const finalGrade = parseInt(grade.replace(/[^0-9]/g, ""), 10);
+
     console.log("=== 🚀 회원가입 전송 데이터 확인 ===");
     console.log({
       name,
       email,
-      birth,
+      birthDate,
       gender,
       school,
       major,
+      grade: finalGrade, // ◀ 숫자로 변환된 이쁜 데이터 전송
       password,
-      passwordCheck, // 비밀번호 확인도 검증용으로 같이 출력
+      passwordCheck,
     });
     console.log("=================================");
 
-    // 원래는 여기서 서버로 회원가입 API 요청을 보냅니다! (ex: axios.post...)
     alert("회원가입이 완료되었습니다! 🎉");
-
     navigate("/main");
   };
 
@@ -328,11 +356,10 @@ function SignUp() {
 
       <ContainerBox>
         <Form onSubmit={handleSubmit}>
-          {/*  하얀색 커스텀 박스 시작 */}
           <Box>
             <LogoArea>
               <div className="logo-text">
-                <img src="./Logo.png" />
+                <img src="./Logo.png" alt="로고" />
               </div>
               <p>한 걸음씩, 더 나은 내일을 향해</p>
             </LogoArea>
@@ -347,8 +374,8 @@ function SignUp() {
             <InfoText>생년월일</InfoText>
             <InputBox
               placeholder="형식: YYYY/MM/DD"
-              value={birth}
-              onChange={(e) => setBirth(e.target.value)}
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
             />
 
             <InfoText>성별</InfoText>
@@ -374,9 +401,15 @@ function SignUp() {
             <InfoText>전공</InfoText>
             <InputBox
               placeholder="(ex) 경영학과"
-              placeholder="소속 학교를 입력해 주세요."
               value={major}
               onChange={(e) => setMajor(e.target.value)}
+            />
+
+            <InfoText>학년</InfoText>
+            <InputBox
+              placeholder="1"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)} // ◀ 오타 수정: setMajor -> setGrade
             />
 
             <InfoText>비밀번호</InfoText>
@@ -395,9 +428,7 @@ function SignUp() {
               onChange={(e) => setPasswordCheck(e.target.value)}
             />
           </Box>
-          {/* 하얀색 커스텀 박스 끝 */}
 
-          {/* 에러 문구 (박스 밖) */}
           <p
             style={{
               width: "85%",
@@ -406,13 +437,12 @@ function SignUp() {
               marginTop: "4px",
               marginBottom: "0",
               textAlign: "left",
-              minHeight: "18px", // 에러 메시지가 비었을 때도 영역 레이아웃이 튕기지 않게 유지
+              minHeight: "18px",
             }}
           >
             {errorMessage}
           </p>
 
-          {/*  회원가입 버튼 (박스 밖) */}
           <SubmitButton
             type="submit"
             className={isFormValid ? "ready" : ""}
