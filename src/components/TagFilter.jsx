@@ -150,7 +150,7 @@ function TagFilter({ isOpen, onClose, onApply, initiallySelected = [] }) {
   // 실제 프로젝트 스펙에 완전히 맞춘 태그 리스트
   const defaultTags = [
     "리더",
-    "피드백 요청",
+    "피드백 요정",
     "아이디어 뱅크",
     "꼼꼼한 마감파",
     "포토샵장인",

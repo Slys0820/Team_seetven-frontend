@@ -1,40 +1,50 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { dummyPosts } from "../data/RecentDummyData";
+import { useNavigate } from "react-router-dom";
 
-// 1. 메인 홈 전체 컨테이너
+// --- [스타일 컴포넌트 구역 - 기존 유지] ---
 const HomeContainer = styled.div`
   width: 100%;
-  min-height: 100vh;
+  height: 100dvh;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding-bottom: 90px; /* 💡 하단 네비게이션 바가 콘텐츠를 가리지 않도록 여백 확보 */
+  overflow: hidden;
 `;
 
-// 2. 🚀 상단 보라색 메인 배너 영역 (낙서 구역 무시, 보라색 배경 통일)
+const FixedHeaderSection = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+`;
+
 const TopBanner = styled.div`
   width: 100%;
-  background-color: #8072eb; /* 프로젝트 메인 보라색 */
-  padding: 20px 24px 40px 24px;
+  height: 10rem;
+  background-color: #8072eb;
+  background-image: url("./mainbanner.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 12px 24px 0 24px;
   box-sizing: border-box;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
   position: relative;
 `;
 
-// 네비게이션 헤더 (STEPS 로고 + 마이페이지 아이콘 들어갈 자리)
 const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 `;
 
 const LogoText = styled.h1`
-  font-size: 1.35rem;
-  font-weight: 900;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #ffffff;
   margin: 0;
   letter-spacing: 0.5px;
@@ -43,73 +53,92 @@ const LogoText = styled.h1`
 const MyPageIconMock = styled.div`
   width: 24px;
   height: 24px;
-  border: 2px solid #ffffff;
   border-radius: 50%;
   cursor: pointer;
-  /* 💡 추후 우측 사람 모양 아이콘 svg나 이미지를 여기에 채우시면 됩니다. */
+  background-image: url("./user2.svg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 `;
 
-// 💡 요청하신 이미지 박스 구역 (직접 채우실 수 있도록 영역 가이드만 제공)
-const ImageBoxGuide = styled.div`
-  width: 100%;
-  height: 120px;
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.15
-  ); /* 보라색 배경 위에서 은은하게 보이도록 처리 */
-  border: 2px dashed rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-bottom: 24px;
-`;
-
-// 검색 바 (와이어프레임 하단 검색 영역 디자인 반영)
 const SearchBarContainer = styled.div`
-  width: 100%;
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: -24px;
   height: 48px;
   background-color: #ffffff;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
+  display: flex; /* 내부 input과 돋보기를 가로 배치하기 위해 다시 활성화 */
+  align-items: center; /* 세로 중앙 정렬 */
   padding: 0 16px;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 10;
 `;
 
-const SearchInputMock = styled.div`
+const SearchInput = styled.input`
   font-size: 0.85rem;
-  color: #a0a0a0;
-  flex: 1;
+  color: #111111; /* 사용자가 입력할 때 써지는 글자 색상 */
+  flex: 1; /* 돋보기 아이콘을 우측 끝으로 밀어내고 남은 공간을 꽉 채웁니다 */
+  border: none; /* input 기본 테두리 제거 */
+  outline: none; /* 클릭(포커스)했을 때 생기는 파란 테두리 제거 */
+  background: transparent; /* 배경을 투명하게 해서 부모 흰색이 보이도록 */
+
+  /* 💡 힌트 문구(placeholder) 색상 지정 */
+  &::placeholder {
+    color: #a0a0a0;
+  }
 `;
 
-// 3. 컨텐츠 바디 구역 (카테고리, 최신글 등)
-const ContentBody = styled.div`
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+const CategorySection = styled.div`
+  padding: 44px 24px 16px 24px;
 `;
 
-// 섹션 타이틀 공통 스타일에 사용
 const SectionTitle = styled.h3`
   font-size: 1.1rem;
   font-weight: 800;
   color: #111111;
-  margin: 0 0 16px 0;
+  margin: 0;
 `;
 
-// 카테고리 임시 그리드 (8개 아이콘용 4열 배치)
+// 1. 기존 CategoryGrid는 그대로 유지하되, 내부 요소들 간의 정렬을 위해 살짝 확인
 const CategoryGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 16px 12px; /* 💡 상하 간격을 위해 row-gap을 16px로 살짝 늘려주면 더 예쁩니다 */
+  margin-top: 16px;
+`;
+
+// 2. 💡 [추가] 박스와 텍스트를 세로로 정렬해 줄 개별 아이템 컨테이너
+const CategoryItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px; /* 💡 아이콘 박스와 아래 글자 사이의 간격 격차 */
+  cursor: pointer;
+`;
+
+// 3. 💡 [수정] 순수하게 '정사각형 이미지 박스' 역할만 하도록 변경된 컴포넌트
+const IconBox = styled.div`
+  width: 100%; /* 그리드 한 칸 너비를 꽉 채움 */
+  aspect-ratio: 1/1; /* 무조건 정사각형 유지 */
+  background-color: #ffffff;
+  border: 1px solid #f0f0f8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+`;
+
+// 4. 💡 [추가] 박스 밑에 붙을 글자 스타일 (기존 텍스트 속성 이관)
+const CategoryLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #555555;
+  text-align: center;
+  word-break: keep-all; /* 글자가 중간에서 애매하게 깨지는 것 방지 */
 `;
 
 const CategoryCardMock = styled.div`
@@ -127,10 +156,27 @@ const CategoryCardMock = styled.div`
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 `;
 
-// 🚀 4. 최신 모집 공고 구역 (이따가 기능 채워넣을 수 있도록 껍데기 공간 확보)
-const LatestPostSection = styled.div`
+const FixedPostHeader = styled.div`
+  padding: 8px 24px 12px 24px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+`;
+
+const ScrollableCardsArea = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 100px 24px;
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0ff;
+    border-radius: 4px;
+  }
 `;
 
 const PostCardMock = styled.div`
@@ -152,10 +198,15 @@ const PostHeader = styled.div`
   gap: 10px;
 `;
 
+// 💡 프로필 이미지 대응을 위해 background 속성 추가 가능하도록 수정
 const AvatarMock = styled.div`
   width: 36px;
   height: 36px;
   background-color: #8072eb;
+  background-image: ${(props) => (props.$imgUrl ? `url(${props.$imgUrl})` : "none")};
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   border-radius: 50%;
 `;
 
@@ -187,104 +238,118 @@ const PostSummary = styled.div`
   line-height: 1.4;
 `;
 
+// --- [컴포넌트 메인 함수] ---
 function MainHome() {
-  // 카테고리 임시 더미 데이터 명칭
+  const navigate = useNavigate();
+
+  // 💡 1. 오타 수정 및 각 카테고리별 이미지 파일명으로 깔끔하게 통일!
   const categories = [
-    "기획",
-    "광고/마케팅",
-    "과학/공학",
-    "네이밍",
-    "경제/금융",
-    "영상/콘텐츠",
-    "문학",
-    "기타",
+    { id: 1, name: "기획", imgSrc: "plan.svg" },
+    { id: 2, name: "광고/마케팅", imgSrc: "marketing.svg" },
+    { id: 3, name: "과학/공학", imgSrc: "engineering.svg" },
+    { id: 4, name: "네이밍/슬로건", imgSrc: "naming.svg" },
+    { id: 5, name: "경제/금융", imgSrc: "finance.svg" },
+    { id: 6, name: "영상/콘텐츠", imgSrc: "video.svg" },
+    { id: 7, name: "문학/시나리오", imgSrc: "literature.svg" },
+    { id: 8, name: "기타", imgSrc: "etc.svg" },
   ];
+
+  // 💡 게시글 데이터를 저장할 상태(State) 생성
+  const [posts, setPosts] = useState([]);
+
+  // 💡 백엔드 통신을 시뮬레이션하는 비동기 함수 구조
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setPosts(dummyPosts);
+      } catch (error) {
+        console.error("게시글을 불러오는 중 오류 발생:", error);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   return (
     <HomeContainer>
-      {/* 🚀 상단 보라색 메인 배너 */}
-      <TopBanner>
-        <HeaderRow>
-          <LogoText>STEPS</LogoText>
-          <MyPageIconMock />
-        </HeaderRow>
+      {/* 📌 고정 영역 그룹 */}
+      <FixedHeaderSection>
+        <TopBanner>
+          <HeaderRow>
+            <LogoText>STEPS</LogoText>
+            <MyPageIconMock
+              onClick={() => {
+                alert("프로필 수정 페이지 연결 필요");
+              }}
+            />
+          </HeaderRow>
+          <SearchBarContainer>
+            <SearchInput
+              type="text"
+              placeholder="팀, 분야, 키워드로 검색해보세요."
+            />
+            <span style={{ color: "#a0a0a0" }}>
+              <img src="/img/Mainimg/검색아이콘.svg" alt="검색이미지" />
+            </span>
+          </SearchBarContainer>
+        </TopBanner>
 
-        {/* 💡 직접 채워넣을 이미지 박스 컴포넌트 구역 */}
-        <ImageBoxGuide>📸 여기에 메인 일러스트나 이미지 채워넣기</ImageBoxGuide>
-
-        {/* 검색 텍스트 영역 */}
-        <SearchBarContainer>
-          <SearchInputMock>팀, 분야, 키워드로 검색해보세요.</SearchInputMock>
-          <span style={{ color: "#a0a0a0" }}>🔍</span>
-        </SearchBarContainer>
-      </TopBanner>
-
-      {/* 메인 컨텐츠 바디 */}
-      <ContentBody>
-        {/* 카테고리 섹션 */}
-        <div>
+        <CategorySection>
           <SectionTitle>카테고리</SectionTitle>
           <CategoryGrid>
-            {categories.map((cat, idx) => (
-              <CategoryCardMock key={idx}>
-                <div
-                  style={{
-                    fontSize: "1.2rem",
-                    marginBottom: "4px",
-                    color: "#8072eb",
-                  }}
-                >
-                  📦
-                </div>
-                {cat}
-              </CategoryCardMock>
+            {categories.map((cat) => (
+              <CategoryItem
+                key={cat.id}
+                onClick={() =>
+                  navigate("/wholepost", { state: { categoryName: cat.name } })
+                }
+              >
+                <IconBox>
+                  {/* 💡 2. 문자열 결합(템플릿 리터럴)을 활용해 함수 내의 이미지 경로를 동적으로 꽂아줍니다! */}
+                  <img
+                    src={`/img/Mainimg/${cat.imgSrc}`}
+                    alt={cat.name}
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                    }} /* 💡 크기는 시안에 맞게 적절히 조절 가능 */
+                  />
+                </IconBox>
+                <CategoryLabel>{cat.name}</CategoryLabel>
+              </CategoryItem>
             ))}
           </CategoryGrid>
-        </div>
+        </CategorySection>
 
-        {/* 🚀 최신 모집 공고 섹션 (이따 기능 채우기용 피막 구역) */}
-        <LatestPostSection>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "between",
-              alignItems: "center",
-            }}
+        <FixedPostHeader>
+          <SectionTitle>최신 모집 공고</SectionTitle>
+          <span
+            style={{ fontSize: "0.8rem", color: "#888888", cursor: "pointer" }}
+            /* 💡 onClick 이벤트를 달아서 원하는 경로로 보내버립니다! */
+            onClick={() => navigate("/wholepost")}
           >
-            <SectionTitle>최신 모집 공고</SectionTitle>
-          </div>
+            전체보기 &gt;
+          </span>
+        </FixedPostHeader>
+      </FixedHeaderSection>
 
-          {/* 더미 공고 카드 1 */}
-          <PostCardMock>
+      {/* 🚀 스크롤 영역 그룹 (함수 변환 완료) */}
+      <ScrollableCardsArea>
+        {/* 💡 배열 내장 함수 .map()을 사용하여 동적으로 카드 렌더링 */}
+        {posts.map((post) => (
+          <PostCardMock key={post.id}>
             <PostHeader>
-              <AvatarMock />
+              <AvatarMock $imgUrl={post.avatarUrl} />
               <PostInfo>
-                <span className="username">poopop</span>
-                <span className="tag">기획 · 아이디어</span>
+                <span className="username">{post.username}</span>
+                <span className="tag">{post.tag}</span>
               </PostInfo>
             </PostHeader>
-            <PostTitle>청년 정책 아이디어 모집</PostTitle>
-            <PostSummary>
-              청년들을 위한 아이디어를 함께 기획하고 제안할 팀원을 찾습니...
-            </PostSummary>
+            <PostTitle>{post.title}</PostTitle>
+            <PostSummary>{post.summary}</PostSummary>
           </PostCardMock>
-
-          {/* 더미 공고 카드 2 */}
-          <PostCardMock>
-            <PostHeader>
-              <AvatarMock />
-              <PostInfo>
-                <span className="username">닉네임</span>
-                <span className="tag">카테고리</span>
-              </PostInfo>
-            </PostHeader>
-            <PostTitle>프로젝트 제목 레이아웃 구역</PostTitle>
-            <PostSummary>
-              여기에 공고 글의 세부 서머리 텍스트가 노출되는 영역입니다.
-            </PostSummary>
-          </PostCardMock>
-        </LatestPostSection>
-      </ContentBody>
+        ))}
+      </ScrollableCardsArea>
     </HomeContainer>
   );
 }
