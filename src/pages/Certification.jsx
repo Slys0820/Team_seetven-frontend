@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PurpleHeader from "../components/PurpleHeader";
-
+import instance from "../api/axios";
 const Box = styled.div`
   display: flex;
   flex-direction: column;
@@ -177,15 +177,71 @@ function Certification() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!selectedFile) return; // 파일이 없으면 실행 안 함
+  // 1️⃣ [임시 확인용] 백엔드 주소 나오기 전까지 활성화해서 테스트하는 함수
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedFile) return;
 
-    // 원래는 여기서 백엔드로 FormData를 보내는 API 통신을 하겠죠?
-    alert("서류 제출이 완료되었습니다!");
+    // FormData에 규격대로 담기는지 가상 검증
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
-    navigate("/wait"); // 여기 승인 대기중 페이지로 교체 해야 함
+    console.log("=== 📦 서버로 보낼 파일 데이터 ===");
+    console.log("Key 명칭: file");
+    console.log("파일명:", selectedFile.name);
+
+    alert(
+      `[임시 테스트: 서류 제출 완료]\n` +
+        `파일명: ${selectedFile.name}\n` +
+        `승인 대기(PENDING) 상태로 전환되어 페이지를 이동합니다.`
+    );
+
+    // 💡 코드 주석에 적어두셨던 대기중 페이지 경로("/wait")로 자연스럽게 라우팅
+    navigate("/wait");
   };
 
+  /* 2️⃣ [실제 연동용] 내일 주소 나오면 1번 함수를 지우고 이 주석을 풀어서 사용할 함수
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedFile) return;
+
+    // 명세서 규격에 맞게 멀티파트 폼 데이터 생성
+    const formData = new FormData();
+    formData.append("file", selectedFile); // 명세서 요구 Key: file
+
+    try {
+      const response = await instance.post("/api/auth/school-verification", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // 성공 시 처리 (상태코드 200 OK)
+      if (response.data && response.data.isSuccess) {
+        alert(response.data.message || "인증 서류가 제출되었습니다.");
+        navigate("/wait"); 
+      } else {
+        alert("서류 제출 중 알 수 없는 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      if (error.response) {
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+
+        if (status === 400) {
+          alert(serverMessage || "잘못된 요청 양식입니다.");
+        } else if (status === 401) {
+          alert(serverMessage || "인증 권한이 없습니다. 다시 로그인해 주세요.");
+        } else {
+          alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+      } else {
+        alert("네트워크 연결이 불안정합니다.");
+      }
+      console.error("학교 인증 통신 실패 내역:", error);
+    }
+  };
+  */
   return (
     <>
       <PurpleHeader title="학교 인증" type="type1" root="/signup" />
@@ -264,6 +320,7 @@ function Certification() {
         <SubmitButton
           onClick={handleSubmit}
           className={selectedFile ? "ready" : ""}
+          disabled={!selectedFile}
         >
           제출하기
         </SubmitButton>

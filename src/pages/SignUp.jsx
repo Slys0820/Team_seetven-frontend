@@ -2,6 +2,8 @@ import styled from "styled-components";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InvisibleHeader from "../components/InvisibleHeader";
+// 💡 로그인 때 만들어둔 axios 인스턴스를 임포트합니다. (경로는 프로젝트 구조에 맞게 수정)
+import instance from "../api/axios";
 
 // 화면 뒷배경 및 전체 페이지 감싸는 박스
 const PageWrapper = styled.div`
@@ -123,7 +125,6 @@ const GenderButton = ({ gend, gender, setGender }) => {
     <StyledGenderButton
       type="button"
       onClick={() => setGender(gend)}
-      /* ◀ isActive가 true일 때만 'active' 클래스를 붙여줌 */
       className={isActive ? "active" : ""}
     >
       {gend}
@@ -162,7 +163,7 @@ const LogoArea = styled.div`
   img {
     width: 40rem;
     height: 10rem;
-    object-fit: cover; /* 이미지가 찌그러지지 않고 비율에 맞게 채워지도록 방지 */
+    object-fit: cover;
     margin-bottom: 0rem;
   }
 
@@ -184,7 +185,7 @@ function SignUp() {
   const [gender, setGender] = useState("");
   const [school, setSchool] = useState("");
   const [major, setMajor] = useState("");
-  const [grade, setGrade] = useState(""); // ◀ 학년 상태
+  const [grade, setGrade] = useState("");
   const [password, setPassword] = useState("");
   const [passwordCheck, setPasswordCheck] = useState("");
 
@@ -199,14 +200,13 @@ function SignUp() {
     const birthRegex = /^\d{4}\/\d{2}\/\d{2}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // 아무것도 입력 안 했을 때는 에러 메시지 비우기
     if (
       !name &&
       !email &&
       !birthDate &&
       !school &&
       !major &&
-      !grade && // ◀ 추가
+      !grade &&
       !password &&
       !passwordCheck
     ) {
@@ -215,7 +215,6 @@ function SignUp() {
       return;
     }
 
-    // 1. 이름 검사
     if (name) {
       if (hasSpace(name) || hasSpecialChar(name) || !isKoreanOrEnglish(name)) {
         setErrorMessage(
@@ -226,7 +225,6 @@ function SignUp() {
       }
     }
 
-    // 2. 이메일 검사
     if (email) {
       if (hasSpace(email)) {
         setErrorMessage("이메일에는 공백을 입력할 수 없습니다.");
@@ -240,7 +238,6 @@ function SignUp() {
       }
     }
 
-    // 3. 생년월일 검사
     if (birthDate) {
       if (!birthRegex.test(birthDate)) {
         setErrorMessage("생년월일은 YYYY/MM/DD 형식으로 입력해야 합니다.");
@@ -249,7 +246,6 @@ function SignUp() {
       }
     }
 
-    // 4. 소속 학교 / 전공 검사
     if (school && hasSpecialChar(school)) {
       setErrorMessage("소속 학교에는 특수문자를 입력할 수 없습니다.");
       setIsFormValid(false);
@@ -261,12 +257,8 @@ function SignUp() {
       return;
     }
 
-    // 📌 [신규] 5. 학년 예외 처리 방어막
     if (grade) {
-      // 숫자만 추출해내기 (유저가 '1' 또는 '1학년'이라고 쳐도 숫자만 발라냄)
       const numericGrade = parseInt(grade.replace(/[^0-9]/g, ""), 10);
-
-      // 숫자가 전혀 없거나, 1~4 범위를 벗어나면 컷트
       if (isNaN(numericGrade) || numericGrade < 1 || numericGrade > 4) {
         setErrorMessage("학년은 1학년부터 4학년까지만 입력 가능합니다.");
         setIsFormValid(false);
@@ -274,7 +266,6 @@ function SignUp() {
       }
     }
 
-    // 6. 비밀번호 검사
     if (password) {
       if (hasSpace(password)) {
         setErrorMessage("비밀번호에는 공백을 입력할 수 없습니다.");
@@ -288,14 +279,12 @@ function SignUp() {
       }
     }
 
-    // 비밀번호 확인 매칭 검사
     if (password && passwordCheck && password !== passwordCheck) {
       setErrorMessage("비밀번호가 서로 일치하지 않습니다.");
       setIsFormValid(false);
       return;
     }
 
-    // 7. 모든 내용 입력 시 버튼 활성화 확인 (grade 조건 추가)
     if (
       name &&
       email &&
@@ -303,7 +292,7 @@ function SignUp() {
       gender &&
       school &&
       major &&
-      grade && // ◀ 필수 조건에 추가
+      grade &&
       password &&
       passwordCheck
     ) {
@@ -323,34 +312,87 @@ function SignUp() {
     grade,
     password,
     passwordCheck,
-  ]); // ◀ 의존성 배열에 grade 추가
+  ]);
 
+  // 💡 백엔드 주소 나오기 전까지 사용하는 임시 테스트용 함수
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isFormValid) return;
 
-    // 백엔드로 보낼 때는 안전하게 숫자(Number) 타입으로 가공해서 보냅니다.
-    const finalGrade = parseInt(grade.replace(/[^0-9]/g, ""), 10);
+    // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
+    const formattedBirthDate = birthDate.replace(/\//g, "-"); // "2001/01/01" -> "2001-01-01"
+    const formattedGender = gender === "남자" ? "male" : "female"; // "남자" -> "male"
 
-    console.log("=== 🚀 회원가입 전송 데이터 확인 ===");
-    console.log({
-      name,
-      email,
-      birthDate,
-      gender,
-      school,
-      major,
-      grade: finalGrade, // ◀ 숫자로 변환된 이쁜 데이터 전송
-      password,
-      passwordCheck,
-    });
-    console.log("=================================");
+    // 2️⃣ [임시 확인용] 서버로 날아갈 최종 가공 데이터를 얼럿으로 확인!
+    alert(
+      `[서버 전송 데이터 확인]\n` +
+        `이름: ${name}\n` +
+        `생년월일: ${formattedBirthDate}\n` +
+        `성별: ${formattedGender}\n` +
+        `학교: ${school}\n` +
+        `이메일: ${email}\n` +
+        `전공: ${major}\n` +
+        `학년: ${grade}\n` +
+        `비밀번호: ${password}\n` +
+        `비밀번호 재확인: ${passwordCheck}`
+    );
 
-    alert("회원가입이 완료되었습니다! 🎉");
-
+    // 3️⃣ 주소가 없으니 일단 에러 없이 다음 페이지로 강제 이동 시켜보기
     navigate("/certification");
   };
+  /*
+  // 💡 백엔드 연동을 구현한 비동기 전송 함수
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isFormValid) return;
 
+    // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
+    const formattedBirthDate = birthDate.replace(/\//g, "-"); // "2001/01/01" -> "2001-01-01"
+    const formattedGender = gender === "남자" ? "male" : "female"; // "남자" -> "male"
+
+    try {
+      // 2️⃣ 명세서의 Endpoint인 /api/auth/signup 으로 POST 요청 전송
+      const response = await instance.post("/api/auth/signup", {
+        name,
+        birthDate: formattedBirthDate,
+        gender: formattedGender,
+        school,
+        email,
+        password,
+        passwordCheck,
+      });
+
+      // 3️⃣ 상태코드 200 성공 분기 처리
+      if (response.data && response.data.isSuccess) {
+        alert(response.data.message || "회원가입이 완료되었습니다! 🎉");
+        navigate("/certification"); // 학교 인증 대기 페이지로 이동
+      } else {
+        setErrorMessage("회원가입 처리 중 알 수 없는 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      // 4️⃣ 백엔드 에러 상태코드 예외 분기 처리 (400, 409 등)
+      if (error.response) {
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+
+        if (status === 409) {
+          // 상태코드 409: 이메일 중복 (MEMBER_409)
+          setErrorMessage(serverMessage || "이미 가입된 이메일입니다.");
+        } else if (status === 400) {
+          // 상태코드 400: 입력 형식 검증 실패
+          setErrorMessage(serverMessage || "입력 형식이 올바르지 않습니다.");
+        } else {
+          // 그 외 서버측 500 오류 등
+          setErrorMessage("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+      } else {
+        // 네트워크 연결 에러 등
+        setErrorMessage("네트워크 연결이 불안정합니다. 인터넷 환경을 확인해 주세요.");
+      }
+      console.error("회원가입 통신 실패 내역:", error);
+    }
+  };
+*/
   return (
     <PageWrapper>
       <InvisibleHeader title="회원가입" />
@@ -410,7 +452,7 @@ function SignUp() {
             <InputBox
               placeholder="1"
               value={grade}
-              onChange={(e) => setGrade(e.target.value)} // ◀ 오타 수정: setMajor -> setGrade
+              onChange={(e) => setGrade(e.target.value)}
             />
 
             <InfoText>비밀번호</InfoText>
@@ -439,6 +481,7 @@ function SignUp() {
               marginBottom: "0",
               textAlign: "left",
               minHeight: "18px",
+              fontWeight: "bold",
             }}
           >
             {errorMessage}
