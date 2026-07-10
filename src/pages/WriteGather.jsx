@@ -227,7 +227,7 @@ function WriteGather() {
 
   return (
     <PageWrapper>
-      <PurpleHeader />
+      <PurpleHeader title="모집 글 작성" root="/wholepost" />
       {/* 제목 카드 */}
       <Card>
         <Title name="제목" />
@@ -369,7 +369,7 @@ function WriteGather() {
       {/* 업로드 버튼 */}
       <SubmitButton
         className={isReady ? "ready" : ""}
-        onClick={() => isReady && navigate("/main")}
+        onClick={() => isReady && navigate("/writeend")}
       >
         업로드
       </SubmitButton>

@@ -52,24 +52,17 @@ const BackButton = styled.div`
   flex-shrink: 0; /* 비율 안 깨지게! */
 `;
 
-export default function PurpleHeader({ title, to }) {
-  // ◀ to 라는 선택적 props 추가
+export default function PurpleHeader({ title, root }) {
   const navigate = useNavigate();
-
-  const handleBack = () => {
-    if (to) {
-      // 만약 toProps가 주어졌다면 지정된 경로로 이동
-      navigate(to);
-    } else {
-      // 아무것도 없다면 기존처럼 그냥 뒤로가기 실행 (하위 호환성 100% 유지)
-      navigate(-1);
-    }
-  };
 
   return (
     <HeaderStyle>
       <SetRayout>
-        <BackButton onClick={handleBack} />
+        <BackButton
+          onClick={() => navigate(root)} // 이전 페이지로 이동
+        />
+
+        {/* 중앙 타이틀 */}
         <h1>{title}</h1>
       </SetRayout>
     </HeaderStyle>

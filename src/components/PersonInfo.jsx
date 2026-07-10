@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import ProfileCard from "./ProfileCard";
+import { useNavigate } from "react-router-dom";
 
 // 1. 전체 카드 외형 (연한 보라색 테두리 + 라운딩)
 
@@ -111,6 +112,7 @@ function PersonInfo({ name, profileImg, tags = [], onCardClick }) {
   // 안전장치: 유저당 태그는 최대 2개까지만 노출되도록 제한
   const displayTags = tags.slice(0, 2);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate("");
 
   return (
     <>
@@ -156,8 +158,8 @@ function PersonInfo({ name, profileImg, tags = [], onCardClick }) {
               name="수락하기"
               xClick={() => setIsOpen(false)}
               onClick={() => {
-                alert("수락되었습니다!");
                 setIsOpen(false);
+                navigate("/acceptend");
               }}
             />
           </CardWrapperInner>
