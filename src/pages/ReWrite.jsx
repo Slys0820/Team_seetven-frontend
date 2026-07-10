@@ -1,18 +1,19 @@
 import styled from "styled-components";
 import { useNavigate, useEffect } from "react-router-dom";
-import PurpleHeaderNoBack from "../components/PurpleHeaderNoBack";
+import PurpleHeader from "../components/PurpleHeader";
 import { useState } from "react";
 
 const InputBox = styled.input`
   width: 100%;
   height: 2.5rem;
-  border: 1.5px solid #cacaca;
+  border: 1px solid #cacaca;
   border-radius: 6px;
   outline: none;
   padding: 10px 16px 10px;
   box-sizing: border-box;
   font-size: 0.85rem;
   color: #1f2937;
+  font-weight: bold;
   background-color: #ffffff;
   align-items: center;
   &::placeholder {
@@ -22,6 +23,11 @@ const InputBox = styled.input`
   &:focus {
     border-color: #7063e3;
   }
+`;
+const P = styled.p`
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 5px;
 `;
 const TextArea = styled.textarea`
   width: 100%;
@@ -35,7 +41,7 @@ const TextArea = styled.textarea`
   color: #1f2937;
   resize: none;
   margin-top: 10px;
-
+  font-weight: bold;
   &::placeholder {
     color: #a9a5a5;
     font-size: 0.75rem;
@@ -99,18 +105,18 @@ const Tag = styled.div`
   display: flex;
   align-items: center;
   background-color: #ffffff;
-  border: 1px solid #828282;
+  border: 1px solid #7063e3;
   border-radius: 20px;
   padding: 2.5px 8.5px;
   font-size: 0.85rem;
-  color: #828282;
+  color: #7063e3;
   letter-spacing: -1px;
   font-weight: 600;
 
   button {
     background: none;
     border: none;
-    color: #828282;
+    color: #7063e3;
     margin-left: 6px;
     cursor: pointer;
     font-size: 0.85rem;
@@ -185,11 +191,14 @@ const Array = styled.div`
 `;
 
 // 메인 함수
-function MakeProfileCard() {
+function ReWrite() {
   const [career, setCareer] = useState("");
   const [intruduction, setIntroduction] = useState("");
   const [selectedTendency, setSelectedTendency] = useState([]);
   const [careers, setCareers] = useState("");
+  const [email, setEmail] = useState("");
+  // 💡 [추가] 현재 화면이 수정 모드(2번)인지 조회 모드(1번)인지 저장하는 상태 (기본값: false = 조회 상태)
+  const [isEdit, setIsEdit] = useState(false);
 
   const tendencies = [
     "# 리더 ",
@@ -240,35 +249,43 @@ function MakeProfileCard() {
   const navigate = useNavigate();
   return (
     <div style={{ height: "100%" }}>
-      <PurpleHeaderNoBack title="프로필 카드 생성" />
+      <PurpleHeader title="프로필 수정" />
       <Array>
+        {/* ================= 1. 기본정보 영역 ================= */}
         <InfoText>
-          자격증 및 수상이력{" "}
-          <span style={{ color: "gray", fontSize: "0.85rem" }}>(선택)</span>
+          기본정보 <span style={{ color: "red" }}> *</span>
         </InfoText>
-        <div style={{ display: "flex", gap: "7px", marginTop: "11px" }}>
-          <InputBox
-            onKeyDown={handleKeyDown} // 엔터 입력 활성화
+        <P>이름</P>
+        <InputBox
+          value="김멋사"
+          disabled
+          style={{
+            backgroundColor: "#f3f4f6",
+            color: "#9ca3af",
+            cursor: "not-allowed",
+          }}
+        />
+        <P>성별</P>
+        <InputBox
+          value="남자"
+          disabled
+          style={{
+            backgroundColor: "#f3f4f6",
+            color: "#9ca3af",
+            cursor: "not-allowed",
+          }}
+        />
+        <P>이메일</P>
+        <InputBox
+          onKeyDown={handleKeyDown}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={!isEdit} // 💡 수정 모드가 아닐 때는 이메일도 입력창 비활성화
+        />
 
-            value={career}
-            onChange={(e) => setCareer(e.target.value)}
-          />
-          <AddButton onClick={handleAddCareer}>추가하기</AddButton>
-        </div>
-        {/* 💡 추가된 자격증들을 타원형 뱃지로 그리는 영역 */}
-        {careers.length > 0 && (
-          <TagContainer>
-            {careers.map((item) => (
-              <Tag key={item.id}>
-                {item.text}
-                {/* 💡 X 버튼 클릭 시 해당 객체의 id를 넘겨 삭제 */}
-                <button onClick={() => handleRemoveCareer(item.id)}>✕</button>
-              </Tag>
-            ))}
-          </TagContainer>
-        )}
         <Line></Line>
 
+        {/* ================= 2. 나의 협업 성향 영역 ================= */}
         <InfoText>
           나의 협업 성향
           <span style={{ color: "gray", fontSize: "0.85rem" }}>
@@ -289,20 +306,18 @@ function MakeProfileCard() {
         >
           키워드로 나를 표현해 보세요.
         </div>
-        <div style={{}}>
-          {tendencies.map((item) => {
-            // 💡 1. 이 아이템이 선택된 상태인지 미리 확인
-            const isSelected = selectedTendency.includes(item);
 
+        <div>
+          {tendencies.map((item) => {
+            const isSelected = selectedTendency.includes(item);
             return (
               <button
                 key={item}
-                onClick={() => handleSelect(item)}
+                /* 💡 수정 모드일 때만 클릭 이벤트를 작동시키고, 조회 모드일 때는 클릭 차단 */
+                onClick={() => isEdit && handleSelect(item)}
                 style={{
-                  display:
-                    "inline-flex" /* 💡 글자와 아이콘을 예쁘게 나란히 배치 */,
+                  display: "inline-flex",
                   alignItems: "center",
-                  /* 💡 2. 선택 여부에 따라 버튼 색상 변경 */
                   backgroundColor: isSelected ? "#7063e3" : "white",
                   color: isSelected ? "white" : "#AAA7A7",
                   border: "1px solid #C3BDBD",
@@ -312,30 +327,29 @@ function MakeProfileCard() {
                   marginRight: "10px",
                   marginBottom: "10px",
                   fontWeight: "600",
-
-                  cursor:
-                    selectedTendency.length === 2 && !isSelected
+                  /* 💡 조회 모드(isEdit=false)일 때는 마우스 커서를 일반 화살표로 고정 */
+                  cursor: !isEdit
+                    ? "default"
+                    : selectedTendency.length === 2 && !isSelected
                       ? "not-allowed"
                       : "pointer",
-                  transition: "all 0.2s ease" /* 색상 변할 때 부드러운 효과 */,
+                  transition: "all 0.2s ease",
                 }}
               >
                 {item}
-
-                {/* 💡 3. 가지고 계신 체크 SVG 이미지를 <img /> 태그로 추가 */}
-                <img
-                  src="check.svg" /* 👈 "copyy.png" 자리에 실제 체크 이미지 파일명을 넣으세요 (예: check.svg) */
-                  alt="체크"
-                  style={{
-                    marginLeft: "3px" /* 글자와의 간격 */,
-                    width: "15px",
-                    height: "auto",
-                    /* 💡 4. 선택 시 filter를 이용해 이미지를 강제로 흰색(#fff)으로 전환 */
-                    filter: isSelected ? "brightness(0) invert(1)" : "none",
-                    transition:
-                      "filter 0.2s ease" /* 아이콘 색상 변할 때 부드러운 효과 */,
-                  }}
-                />
+                {/* 💡 선택된 항목이면서 + '수정 모드'일 때만 체크 아이콘 노출 */}
+                {isSelected && (
+                  <img
+                    src="check.svg"
+                    alt="체크"
+                    style={{
+                      marginLeft: "3px",
+                      width: "15px",
+                      height: "auto",
+                      filter: "brightness(0) invert(1)",
+                    }}
+                  />
+                )}
               </button>
             );
           })}
@@ -343,42 +357,123 @@ function MakeProfileCard() {
 
         <Line style={{ marginTop: "10px" }}></Line>
 
+        {/* ================= 3. 자격증 및 수상이력 영역 ================= */}
+        <InfoText>
+          자격증 및 수상이력{" "}
+          <span style={{ color: "gray", fontSize: "0.85rem" }}>(선택)</span>
+        </InfoText>
+
+        {/* 💡 [조건부 렌더링] 수정 모드일 때만 입력창과 추가하기 버튼 노출 */}
+        {isEdit && (
+          <div style={{ display: "flex", gap: "7px", marginTop: "11px" }}>
+            <InputBox
+              onKeyDown={handleKeyDown}
+              value={career}
+              onChange={(e) => setCareer(e.target.value)}
+            />
+            <AddButton onClick={handleAddCareer}>추가하기</AddButton>
+          </div>
+        )}
+
+        {/* 등록된 자격증 뱃지 노출 영역 */}
+        {careers.length > 0 && (
+          <TagContainer style={{ marginTop: isEdit ? "12px" : "4px" }}>
+            {careers.map((item) => (
+              <Tag key={item.id}>
+                {item.text}
+                {/* 💡 수정 모드일 때만 삭제(X) 버튼을 보여줌 */}
+                {isEdit && (
+                  <button onClick={() => handleRemoveCareer(item.id)}>×</button>
+                )}
+              </Tag>
+            ))}
+          </TagContainer>
+        )}
+
+        <Line style={{ marginTop: "20px" }}></Line>
+
+        {/* ================= 4. 자기소개 영역 ================= */}
         <InfoText>
           자기소개 <span style={{ color: "red" }}>*</span>
         </InfoText>
-        <span
+        <div
           style={{
             color: "#A9A5A5",
             fontSize: "0.75rem",
             letterSpacing: "-1px",
             fontWeight: "550",
+            marginBottom: "8px",
           }}
         >
           프로젝트에 기여할 수 있는 나의 역량을 작성해 주세요.
-        </span>
+        </div>
 
-        {/* 💡 마진을 추가하여 아래 버튼이나 다른 요소와 안 겹치게 공간 확보 */}
-        <TextSet>
-          <TextArea
-            maxLength={300}
-            placeholder="나의 강점, 자격증, 프로젝트 경험, 사용 가능한 툴 등 ..."
-            value={intruduction}
-            onChange={(e) => setIntroduction(e.target.value)}
-          />
-          {/* 💡 위에서 만든 바깥 영역의 WordCounter 컴포넌트 사용 */}
-          <WordCounter>{intruduction.length}/300자</WordCounter>
-        </TextSet>
-        <SubmitButton
-          onClick={() => navigate("/writeendtwo")}
-          className={
-            intruduction && selectedTendency.length === 2 ? "ready" : ""
-          }
+        {/* 💡 [조건부 렌더링] 모드에 따라 입력 테두리상자(TextSet) 스타일과 내부 태그 변환 */}
+        <TextSet
+          style={{
+            border: !isEdit ? "none" : "1px solid #aaa7a7",
+            padding: !isEdit ? "0px" : "0 0 20px 0",
+          }}
         >
-          완료
-        </SubmitButton>
+          {isEdit ? (
+            // ⭕ 수정 모드일 때는 기존의 입력 창(TextArea)과 글자수 카운터 노출
+            <>
+              <TextArea
+                maxLength={300}
+                placeholder="나의 강점, 자격증, 프로젝트 경험, 사용 가능한 툴 등"
+                value={intruduction}
+                onChange={(e) => setIntroduction(e.target.value)}
+              />
+              <WordCounter>{intruduction.length}/300자</WordCounter>
+            </>
+          ) : (
+            // ❌ 조회 모드일 때는 스크롤이 가능한 일반 뷰용 div 텍스트 노출 (textarea 대신)
+            <div
+              style={{
+                width: "100%",
+                fontSize: "0.85rem",
+                color: "#1f2937",
+                fontWeight: "bold",
+                lineHeight: "160%",
+                whiteSpace: "pre-wrap",
+                padding: "8px 4px",
+              }}
+            >
+              {intruduction || "등록된 자기소개가 없습니다."}
+            </div>
+          )}
+        </TextSet>
+
+        {/* ================= 5. 하단 버튼 영역 ================= */}
+        {isEdit ? (
+          // ⭕ 수정 모드일 때는 [저장]용 버튼 노출 (기존 SubmitButton 활성화 로직 유지)
+          <SubmitButton
+            onClick={() => {
+              // 여기에 백엔드 통신(axios.post 등) 코드가 들어갈 자리입니다.
+              setIsEdit(false); // 저장 완료 후 조회 모드로 탈출
+            }}
+            className={
+              email.trim() && intruduction && selectedTendency.length === 2
+                ? "ready"
+                : ""
+            }
+          >
+            저장
+          </SubmitButton>
+        ) : (
+          // ❌ 조회 모드일 때는 언제나 활성화된 보라색 [수정하기] 버튼 노출
+          <SubmitButton
+            onClick={() => setIsEdit(true)} // 클릭 시 즉시 수정 레이아웃으로 변경
+            className="ready"
+          >
+            수정하기
+          </SubmitButton>
+        )}
+
+        <div style={{ height: "100px" }}></div>
       </Array>
     </div>
   );
 }
 
-export default MakeProfileCard;
+export default ReWrite;
