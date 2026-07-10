@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
-// ❌ 중복된 import React 문 제거 완료
+
+// 🔄 빙글빙글 도는 회전 애니메이션 정의
+const rotate = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 // 전체 화면 레이아웃
 const Box = styled.div`
@@ -14,6 +23,7 @@ const Box = styled.div`
   box-sizing: border-box;
 `;
 
+// 💡 내부 이미지들을 겹치기 위해 relative 설정
 const ImageArea = styled.div`
   width: 20rem;
   height: 20rem;
@@ -21,24 +31,39 @@ const ImageArea = styled.div`
   justify-content: center;
   align-items: center;
   margin-bottom: 60px;
+  position: relative; /* 자식 요소 absolute 배치를 위함 */
+`;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+// 💡 1. 빙글빙글 돌아가는 바깥쪽 원 이미지
+const RotatingCircle = styled.img`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: ${rotate} 15s linear infinite; /* n초 동안 부드럽게 무한 회전 (속도는 원하시는 대로 조절 가능!) */
+`;
+
+// 💡 2. 가만히 고정되어 있는 안쪽 발자국 이미지
+const FixedFeet = styled.img`
+  position: absolute;
+  width: 60%; /* 원 크기에 맞춰 적절히 조절 가능 */
+  height: 60%;
+  object-fit: contain;
+  z-index: 2; /* 원보다 위에 오도록 설정 */
 `;
 
 const MainTitle = styled.h2`
   width: 95%;
   font-size: 1.45rem;
   font-weight: 800;
-  color: #111111;
+  color: #4e39f1;
   margin: 0 0 10px 0;
-  text-align: left;
+
+  /* 💡 status가 'wait'이면 center, 아니면(fail 등) left로 정렬 */
+  text-align: ${({ $status }) => ($status === "wait" ? "center" : "left")};
 
   span.highlight {
-    color: #8072eb;
+    color: #4e39f1;
   }
 `;
 
@@ -48,8 +73,9 @@ const SubDescription = styled.p`
   font-weight: 500;
   color: #888888;
   margin: 0 0 32px 0;
-  text-align: left;
+
   line-height: 1.4;
+  text-align: ${({ $status }) => ($status === "wait" ? "center" : "left")};
 `;
 
 const FailGuideBox = styled.div`
@@ -127,11 +153,12 @@ function CertificationWait() {
       {status === "wait" && (
         <>
           <ImageArea style={{ marginTop: "auto" }}>
-            <img src="./steps.png" alt="발자국 이미지" />
+            <RotatingCircle src="./loading.svg" alt="회전하는 원" />
+            <FixedFeet src="./foot.svg" alt="고정된 발자국" />
           </ImageArea>
 
-          <MainTitle>승인 대기 중이에요...</MainTitle>
-          <SubDescription style={{ marginBottom: "auto" }}>
+          <MainTitle $status={status}>승인 대기 중이에요...</MainTitle>
+          <SubDescription $status={status} style={{ marginBottom: "auto" }}>
             인증 작업은 보통 12시간 내로 승인 완료됩니다.
           </SubDescription>
         </>
@@ -144,10 +171,11 @@ function CertificationWait() {
             <img src="./fail.svg" alt="인증 실패 그래픽" />
           </ImageArea>
 
-          <MainTitle>
+          <MainTitle $status={status}>
             인증에 <span className="highlight">실패</span>했어요...
           </MainTitle>
-          <SubDescription>
+
+          <SubDescription $status={status}>
             필수로 인증해야 하는 항목을 다시 확인해 주세요.
           </SubDescription>
 

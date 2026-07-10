@@ -83,6 +83,7 @@ const Mail = styled.div`
   display: flex;
   gap: 10px;
   align-items: center;
+  background-color: #2b3351;
   justify-content: center;
 
   &::after {

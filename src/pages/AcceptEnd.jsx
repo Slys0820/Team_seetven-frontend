@@ -53,7 +53,7 @@ const EmailCopyButton = styled.button`
   display: flex;
   align-items: center;
   gap: 6px;
-  background-color: #ffffff;
+
   border: 1px solid #d8d8d8;
   border-radius: 6px;
   padding: 6px 11px;
@@ -62,9 +62,9 @@ const EmailCopyButton = styled.button`
   color: #7063e3;
   font-weight: 560;
   transition: all 0.2s;
-
+  background-color: #ffffff;
   &:hover {
-    background-color: #f9fafb;
+    background-color: !#f9fafb;
     border-color: #7063e3;
   }
 
@@ -187,7 +187,11 @@ function AcceptEnd() {
   return (
     <>
       <BackGround>
-        <img style={{ margin: "10%" }} src="people.png" alt="완료" />
+        <img
+          style={{ margin: "9%", marginBottom: "6%" }}
+          src="people.png"
+          alt="완료"
+        />
         <Title>수락 완료!</Title>
         <SubText>
           이제 메일로 팀 프로젝트의 <br /> 첫 걸음을 시작해 보세요

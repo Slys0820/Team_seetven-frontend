@@ -249,7 +249,7 @@ function ReWrite() {
   const navigate = useNavigate();
   return (
     <div style={{ height: "100%" }}>
-      <PurpleHeader title="프로필 수정" />
+      <PurpleHeader title="프로필 수정" root="/main" />
       <Array>
         {/* ================= 1. 기본정보 영역 ================= */}
         <InfoText>

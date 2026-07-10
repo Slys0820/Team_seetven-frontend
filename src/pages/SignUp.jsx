@@ -319,7 +319,7 @@ function SignUp() {
     // 원래는 여기서 서버로 회원가입 API 요청을 보냅니다! (ex: axios.post...)
     alert("회원가입이 완료되었습니다! 🎉");
 
-    navigate("/main");
+    navigate("/certification");
   };
 
   return (

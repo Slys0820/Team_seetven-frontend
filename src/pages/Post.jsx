@@ -243,7 +243,7 @@ function Post() {
   if (loading) {
     return (
       <Box>
-        <PurpleHeader title="모집 상세 정보" />
+        <PurpleHeader title="모집 상세 정보" root="/wholepost" />
         <ContentBox>
           <p
             style={{ textAlign: "center", color: "#7063e3", marginTop: "40px" }}
@@ -258,10 +258,10 @@ function Post() {
   if (!post) {
     return (
       <Box>
-        <PurpleHeader title="모집 상세 정보" />
+        <PurpleHeader title="모집 상세 정보" root="/wholepost" />
         <ContentBox>
           <p>존재하지 않거나 삭제된 게시글입니다.</p>
-          <button onClick={() => navigate(-1)}>뒤로 가기</button>
+          <button onClick={() => navigate("/wholepost")}>뒤로 가기</button>
         </ContentBox>
       </Box>
     );
@@ -269,7 +269,7 @@ function Post() {
 
   return (
     <Box>
-      <PurpleHeader title="모집 상세 정보" />
+      <PurpleHeader title="모집 상세 정보" root={-1} />
 
       <ContentBox>
         <CategoryTag>{post.category} • 아이디어</CategoryTag>

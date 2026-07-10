@@ -106,7 +106,7 @@ function WriteEnd() {
         >
           나와 마음이 맞는 멋진 팀원들을 기다려 봐요.
         </div>
-        <NextButton onClick={() => navigate("/main")}> 완료</NextButton>
+        <NextButton onClick={() => navigate("/post/:id ")}> 완료</NextButton>
       </BackGround>
     </>
   );
