@@ -65,7 +65,9 @@ const FloatingButton = styled.button`
   justify-content: center;
   cursor: pointer;
   z-index: 99; /* 리스트 카드보다 위에 뜨도록 설정 */
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 
   img {
     width: 24px;
@@ -76,7 +78,6 @@ const FloatingButton = styled.button`
     background-color: #5b4ec7;
     transform: scale(0.95); /* 클릭 시 살짝 작아지는 피드백 효과 */
   }
-}
 `;
 
 function WholePost() {
@@ -107,7 +108,7 @@ function WholePost() {
 
   return (
     <Box>
-      <PurpleHeader title="전체 글" to="/main" />
+      <PurpleHeader title="전체 글" root="/main" />
 
       <TabBar>
         {categories.map((category) => (
@@ -150,8 +151,7 @@ function WholePost() {
       {/* 🚀 우측 하단 플로팅 글쓰기 버튼 추가 */}
       <FloatingButton
         onClick={() => {
-          navigate("/");
-          alert("네비게이트 경로 수정 필요");
+          navigate("/writegather");
         }}
       >
         {/* 퍼플헤더나 다른 곳에서 쓰던 펜/수정 아이콘 경로를 넣어주시면 됩니다 */}

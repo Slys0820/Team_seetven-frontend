@@ -45,7 +45,7 @@ const Img = styled.img`
   height: auto; /* 세로 비율 자동 유지 */
 `;
 
-function WriteEnd() {
+function WriteEndTwo() {
   const navigate = useNavigate();
   // 💡 2. 화면에 처음 들어왔을 때 폭죽 터뜨리기
 
@@ -93,7 +93,7 @@ function WriteEnd() {
             letterSpacing: "-1px",
           }}
         >
-          작성 완료!{" "}
+          생성 완료!{" "}
         </div>
         <div
           style={{
@@ -104,12 +104,12 @@ function WriteEnd() {
             letterSpacing: "-1px",
           }}
         >
-          나와 마음이 맞는 멋진 팀원들을 기다려 봐요.
+          이제 시작해 볼까요?
         </div>
-        <NextButton onClick={() => navigate("/post/:id ")}> 완료</NextButton>
+        <NextButton onClick={() => navigate("/main")}> 완료</NextButton>
       </BackGround>
     </>
   );
 }
 
-export default WriteEnd;
+export default WriteEndTwo;

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
+import WholePost from "../pages/WholePost";
 
 const Icon = ({ name, activeSrc, inactiveSrc, isActive, movePath }) => {
   // 아이콘과 밑에 글자 묶음 컴포넌트
@@ -59,30 +60,29 @@ const NavigationBar = () => {
         <Icon
           activeSrc="PHome.png"
           inactiveSrc="Home.png"
-          isActive={["/main"].includes(location.pathname)} // []안에 포함된 주소들에서 보랴색이됨
+          isActive={["/main", "/wholepost"].includes(location.pathname)} // []안에 포함된 주소들에서 보랴색이됨
           name="홈"
           movePath={"/main"}
         />
         <Icon
           activeSrc="Pusers.png"
           inactiveSrc="users.png"
-          isActive={["/", "/certification"].includes(location.pathname)}
+          isActive={["/myteam"].includes(location.pathname)}
           name="My 팀"
-          movePath={"/"}
+          movePath={"/myteam"}
         />
         <Icon
           activeSrc="Parchive.png"
           inactiveSrc="archive.png"
-          isActive={["/"].includes(location.pathname)}
+          isActive={["/storage"].includes(location.pathname)}
           name="보관함"
-          movePath={"/"}
+          movePath={"/storage"}
         />
         <Icon
           activeSrc="PFrame 47.png"
           inactiveSrc="Frame 47.png"
           isActive={["/"].includes(location.pathname)}
           name="설정"
-          movePath={"/"}
         />
         {/* 나머지 My 팀, 보관함, 설정 버튼들도 동일한 구조로 배치 */}
       </div>

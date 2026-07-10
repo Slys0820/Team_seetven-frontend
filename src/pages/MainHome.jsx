@@ -283,7 +283,7 @@ function MainHome() {
             <LogoText>STEPS</LogoText>
             <MyPageIconMock
               onClick={() => {
-                alert("프로필 수정 페이지 연결 필요");
+                navigate("/rewrite");
               }}
             />
           </HeaderRow>

@@ -183,12 +183,12 @@ function Certification() {
     // 원래는 여기서 백엔드로 FormData를 보내는 API 통신을 하겠죠?
     alert("서류 제출이 완료되었습니다!");
 
-    navigate("/"); // 여기 승인 대기중 페이지로 교체 해야 함
+    navigate("/wait"); // 여기 승인 대기중 페이지로 교체 해야 함
   };
 
   return (
     <>
-      <PurpleHeader title="학교 인증" type="type1" />
+      <PurpleHeader title="학교 인증" type="type1" root="/signup" />
       <Box>
         <div style={{ width: "100%", display: "flex", marginTop: "5rem" }}>
           <BadgeIcon>
@@ -261,7 +261,10 @@ function Certification() {
           </ul>
         </InfoGuideBox>
 
-        <SubmitButton className={selectedFile ? "ready" : ""}>
+        <SubmitButton
+          onClick={handleSubmit}
+          className={selectedFile ? "ready" : ""}
+        >
           제출하기
         </SubmitButton>
       </Box>

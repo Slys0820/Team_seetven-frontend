@@ -205,7 +205,7 @@ function Storage() {
 
   return (
     <PageContainer>
-      <PurpleHeader title="보관함" />
+      <PurpleHeader title="보관함" root="/main" />
 
       {/* 메인 탭 */}
       <MainTabRow>

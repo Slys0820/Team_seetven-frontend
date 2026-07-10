@@ -137,7 +137,7 @@ function MyTeam() {
   return (
     <PageContainer>
       {/* 헤더 글자 My팀 반영 */}
-      <PurpleHeader title="My팀" />
+      <PurpleHeader title="My팀" root="/main" />
 
       <ListContainer>
         {selectedPostId === null ? (
