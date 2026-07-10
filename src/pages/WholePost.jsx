@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import PostInfo from "../components/PostInfo";
 import PurpleHeader from "../components/PurpleHeader";
 import { useNavigate, useLocation } from "react-router-dom";
-
-import { DummyData } from "../data/DummyData";
+import instance from "../api/axios"; // 💡 axios 인스턴스 임포트
 
 const Box = styled.div`
   width: 100%;
@@ -82,9 +81,8 @@ const FloatingButton = styled.button`
 
 function WholePost() {
   const navigate = useNavigate();
-  const location = useLocation(); // 💡 라우터 state를 읽기 위한 훅 선언
+  const location = useLocation();
 
-  // 💡 메인에서 넘겨받은 categoryName이 있으면 그걸 초기값으로 쓰고, 없으면 기본값인 "기획"을 씁니다.
   const initialTab = location.state?.categoryName || "기획";
 
   const categories = [
@@ -98,13 +96,49 @@ function WholePost() {
     "기타",
   ];
 
-  // 💡 초기값 상태에 initialTab을 쏙 넣어줍니다
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // 🚀 백엔드에서 받아올 데이터 구조 시뮬레이션 (더미 데이터)
+  // 💡 백엔드에서 통째로 받아올 전체 게시글 상태
+  const [allPosts, setAllPosts] = useState([]);
 
-  // 현재 선택된 탭(카테고리)에 해당하는 글들만 필터링
-  const filteredPosts = DummyData.filter((post) => post.category === activeTab);
+  // 🚀 백엔드 API 연동 (`GET /api/posts`) + 401 토큰 만료 예외 처리 추가
+  useEffect(() => {
+    const fetchAllPosts = async () => {
+      try {
+        const response = await instance.get("/api/posts");
+        // 명세서에 적힌 대로 response.data.result 자체가 리스트 배열입니다.
+        if (response.data && response.data.isSuccess) {
+          setAllPosts(response.data.result || []);
+        }
+      } catch (error) {
+        // 💡 401 에러 핸들링 (토큰 없음 / 만료 대응)
+        if (error.response && error.response.status === 401) {
+          const serverMessage =
+            error.response.data?.message || "인증이 필요합니다.";
+          alert(serverMessage);
+
+          localStorage.removeItem("token"); // 기존 토큰 삭제
+          navigate("/login"); // 로그인 페이지로 리다이렉트
+        } else {
+          console.error("전체 글 목록을 불러오는 중 오류 발생:", error);
+        }
+      }
+    };
+
+    fetchAllPosts();
+  }, [navigate]);
+
+  // 🚀 프론트엔드단에서 직접 돌리는 카테고리 필터링 로직
+  // 백엔드에서 준 카테고리 텍스트(예: "기획 • 아이디어")에 현재 탭 문자열이 포함되어 있는지 검사합니다.
+  const filteredPosts = allPosts.filter(
+    (post) => post.category && post.category.includes(activeTab)
+  );
+
+  // 날짜 형식 이쁘게 잘라주는 헬퍼 함수 ("2026-07-01T18:30:00" -> "2026-07-01")
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return dateString.split("T")[0];
+  };
 
   return (
     <Box>
@@ -114,7 +148,7 @@ function WholePost() {
         {categories.map((category) => (
           <TabItem
             key={category}
-            $active={activeTab === category} /* 💡 $active로 전달 */
+            $active={activeTab === category}
             onClick={() => setActiveTab(category)}
           >
             {category}
@@ -123,23 +157,21 @@ function WholePost() {
       </TabBar>
 
       <PostListContainer>
-        {/* 🚀 필터링된 배열을 map 돌려서 PostInfo 컴포넌트 동적 렌더링 */}
         {filteredPosts.length > 0 ? (
           filteredPosts.map((post) => (
             <PostInfo
-              key={post.id}
-              isClosed={post.isClosed}
+              key={post.postId}
+              // 💡 "마감"이면 true, "모집중"이면 false가 가도록 삼항연산자 예외 처리
+              isClosed={post.postStatus === "모집마감"} //디버그 표식
               title={post.title}
-              name={post.name}
-              date={post.date}
+              name={post.writerName || "익명 크루"}
+              date={formatDate(post.createdAt)}
               onClick={() => {
-                console.log(`${post.id}번 글 클릭됨`); // 임시 디버그 로그
-                navigate(`/post/${post.id}`); // 페이지 이동
+                navigate(`/post/${post.postId}`);
               }}
             />
           ))
         ) : (
-          // 게시글이 없을시 뜨는 문구
           <div
             style={{ textAlign: "center", color: "#9ca3af", padding: "40px 0" }}
           >
@@ -148,13 +180,11 @@ function WholePost() {
         )}
       </PostListContainer>
 
-      {/* 🚀 우측 하단 플로팅 글쓰기 버튼 추가 */}
       <FloatingButton
         onClick={() => {
           navigate("/writegather");
         }}
       >
-        {/* 퍼플헤더나 다른 곳에서 쓰던 펜/수정 아이콘 경로를 넣어주시면 됩니다 */}
         <img src="../edit.svg" alt="글쓰기" />
       </FloatingButton>
     </Box>

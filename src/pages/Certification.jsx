@@ -177,30 +177,7 @@ function Certification() {
     }
   };
 
-  // 1️⃣ [임시 확인용] 백엔드 주소 나오기 전까지 활성화해서 테스트하는 함수
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedFile) return;
-
-    // FormData에 규격대로 담기는지 가상 검증
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    console.log("=== 📦 서버로 보낼 파일 데이터 ===");
-    console.log("Key 명칭: file");
-    console.log("파일명:", selectedFile.name);
-
-    alert(
-      `[임시 테스트: 서류 제출 완료]\n` +
-        `파일명: ${selectedFile.name}\n` +
-        `승인 대기(PENDING) 상태로 전환되어 페이지를 이동합니다.`
-    );
-
-    // 💡 코드 주석에 적어두셨던 대기중 페이지 경로("/wait")로 자연스럽게 라우팅
-    navigate("/wait");
-  };
-
-  /* 2️⃣ [실제 연동용] 내일 주소 나오면 1번 함수를 지우고 이 주석을 풀어서 사용할 함수
+  // 2️⃣ [실제 연동용] 백엔드 명세서 규격에 맞춘 에러 처리 적용
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedFile) return;
@@ -210,38 +187,51 @@ function Certification() {
     formData.append("file", selectedFile); // 명세서 요구 Key: file
 
     try {
-      const response = await instance.post("/api/auth/school-verification", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await instance.post(
+        "/api/auth/school-verification",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       // 성공 시 처리 (상태코드 200 OK)
-      if (response.data && response.data.isSuccess) {
-        alert(response.data.message || "인증 서류가 제출되었습니다.");
-        navigate("/wait"); 
-      } else {
-        alert("서류 제출 중 알 수 없는 오류가 발생했습니다.");
+      // 백엔드가 결과 성공 여부를 주는 필드명(예: isSuccess)에 맞춰 조율하세요.
+      if (response.data) {
+        alert(
+          response.data.message || "인증 서류가 성공적으로 제출되었습니다."
+        );
+        navigate("/wait");
       }
     } catch (error) {
       if (error.response) {
         const status = error.response.status;
         const serverMessage = error.response.data?.message;
 
+        // 명세서 기반 수동 에러 처리 영역
         if (status === 400) {
-          alert(serverMessage || "잘못된 요청 양식입니다.");
+          // VERIFICATION_400 처리
+          alert(
+            serverMessage || "첨부된 서류가 없거나 형식이 올바르지 않습니다."
+          );
         } else if (status === 401) {
-          alert(serverMessage || "인증 권한이 없습니다. 다시 로그인해 주세요.");
+          // COMMON_401 처리
+          alert(serverMessage || "인증이 필요합니다. 다시 로그인해 주세요.");
+          localStorage.removeItem("token");
+          navigate("/login"); // 필요 시 로그인 페이지로 강제 리다이렉트
         } else {
+          // 그 외 서버 에러 (500 등)
           alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
         }
       } else {
-        alert("네트워크 연결이 불안정합니다.");
+        // 서버가 켜져 있지 않거나 네트워크가 완전히 끊긴 경우
+        alert("서버와 연결할 수 없습니다. 네트워크 상태를 확인해주세요.");
       }
       console.error("학교 인증 통신 실패 내역:", error);
     }
   };
-  */
   return (
     <>
       <PurpleHeader title="학교 인증" type="type1" root="/signup" />
