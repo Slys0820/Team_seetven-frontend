@@ -217,7 +217,7 @@ function Storage() {
             setActiveFilters([]); // 초기화
           }}
         >
-          내가 신청한 모집글
+          내가 지원한 모집글
         </MainTabButton>
         <MainTabButton
           $active={mainTab === "uploaded"}

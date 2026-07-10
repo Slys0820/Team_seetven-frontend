@@ -107,7 +107,7 @@ function WholePost() {
 
   return (
     <Box>
-      <PurpleHeader title="전체 글" />
+      <PurpleHeader title="전체 글" to="/main" />
 
       <TabBar>
         {categories.map((category) => (

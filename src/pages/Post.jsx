@@ -76,8 +76,8 @@ const SectionTitle = styled.div`
 
 // 모집 정보, 내용 테두리
 const InfoTableBox = styled.div`
-  border: 1px solid #7063e3; /* 테두리*/
-  box-shadow: 0px 0px 2px 0px #7063e380; /*겉 그림자*/
+  border: none; /* 테두리*/
+  box-shadow: 0px 0px 2px 0px #7063e3;
   border-radius: 16px;
   padding: 10px 18px;
   display: flex;
@@ -157,11 +157,10 @@ const ContentDetailBox = styled.div`
   .quote-end {
     align-self: flex-end;
     width: 2rem;
-    height: 2rem;
   }
 `;
 
-// 🚀 하단 고정 바 수정 (북마크가 빠져서 간격 제거 및 가로 패딩 유지)
+// 하단 고정 바
 const FixedBottomBar = styled.div`
   position: fixed;
   bottom: 0;
@@ -177,11 +176,11 @@ const FixedBottomBar = styled.div`
   z-index: 100;
 `;
 
-// 🚀 전체 너비를 꽉 채우는 단독 지원 버튼 (시안 이미지 규격 반영)
+// 단독 지원 버튼
 const FullApplyButton = styled.button`
   width: 100%;
   height: 54px;
-  background-color: ${(props) => (props.disabled ? "#d1d5db" : "#7063e3")}; /* 마감/신청완료 시 회색 변환 */
+  background-color: ${(props) => (props.disabled ? "#d1d5db" : "#7063e3")};
   color: white;
   border: none;
   border-radius: 14px;
@@ -201,10 +200,9 @@ function Post() {
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // 🚀 한 번 지원하면 고정되는 상태 정의
   const [isApplied, setIsApplied] = useState(false);
 
+  // 1. 데이터 패칭용 useEffect
   useEffect(() => {
     const fetchPostData = async () => {
       setLoading(true);
@@ -213,7 +211,6 @@ function Post() {
 
         if (serverData) {
           setPost(serverData);
-          // 나중에 백엔드와 연동 시 유저가 기지원한 글인지 여부도 이곳에서 세팅 가능합니다.
           setIsApplied(serverData.isApplied ?? false);
         } else {
           setPost(null);
@@ -228,18 +225,28 @@ function Post() {
     fetchPostData();
   }, [id]);
 
-  // 🚀 지원하기 클릭 핸들러 (취소 불가 안내 및 상태 잠금)
+  // 📌 2. 타이머 제어용 useEffect (순서를 위로 끌어올려 Early Return과의 충돌을 예방합니다)
+  useEffect(() => {
+    let timer;
+    if (!post && !loading) {
+      timer = setTimeout(() => {
+        navigate("/wholepost");
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [post, loading, navigate]);
+
+  // 지원하기 클릭 핸들러
   const handleApplyClick = () => {
     if (
       window.confirm("정말 지원하시겠습니까? 지원한 후에는 취소할 수 없습니다.")
     ) {
       setIsApplied(true);
       alert("지원이 완료되었습니다!");
-      // [TODO] 백엔드 지원 통신 API 연동할 곳
-      // await axios.post(`/api/posts/${id}/apply`);
     }
   };
 
+  // 3. 로딩 상태 렌더링 (모든 Hook 정의보다 반드시 아래에 있어야 함)
   if (loading) {
     return (
       <Box>
@@ -255,18 +262,26 @@ function Post() {
     );
   }
 
+  // 4. 데이터 없을 때 예외 렌더링
   if (!post) {
     return (
       <Box>
         <PurpleHeader title="모집 상세 정보" />
-        <ContentBox>
-          <p>존재하지 않거나 삭제된 게시글입니다.</p>
-          <button onClick={() => navigate(-1)}>뒤로 가기</button>
+        <ContentBox style={{ textAlign: "center", padding: "40px 0" }}>
+          <p style={{ fontWeight: "bold", color: "#1f2937" }}>
+            존재하지 않거나 삭제된 게시글입니다.
+          </p>
+          <p
+            style={{ fontSize: "0.85rem", color: "#9ca3af", marginTop: "10px" }}
+          >
+            1초 후에 전체 모집 글 페이지로 이동합니다.
+          </p>
         </ContentBox>
       </Box>
     );
   }
 
+  // 5. 정상 렌더링
   return (
     <Box>
       <PurpleHeader title="모집 상세 정보" />
@@ -372,10 +387,9 @@ function Post() {
         </InfoTableBox>
       </ContentBox>
 
-      {/* 🚀 개편된 단독 하단 바 영역 */}
       <FixedBottomBar>
         <FullApplyButton
-          disabled={post.isClosed || isApplied} // 모집 마감되었거나 이미 지원했으면 비활성화
+          disabled={post.isClosed || isApplied}
           onClick={handleApplyClick}
         >
           {post.isClosed ? "모집 마감" : isApplied ? "지원 완료" : "지원하기"}
