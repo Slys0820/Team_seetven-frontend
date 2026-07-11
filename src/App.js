@@ -34,6 +34,7 @@ function AppContent() {
     "/writeend",
     "/acceptend",
     "/rewrite",
+    "/makeprofilecard",
   ];
   const showNavBar =
     !excludePaths.includes(location.pathname) &&

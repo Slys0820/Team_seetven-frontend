@@ -200,9 +200,10 @@ const IntroductionText = styled.div`
 `;
 
 // 컴포넌트 위는 다
-const ProfileCard = ({ onClick, name, xClick }) => {
+const ProfileCard = ({ onClick, name, xClick, profileData }) => {
   // 하단버튼기능, 하단버튼 이름, x버튼 기능
-
+  {
+    /* 
   // 나중에 백엔드 데이터로 교체할 임시 데이터
   const keywords = ["# 기획", "# 소통왕"];
   // 테스트를 위해 자격증이 6개 있는 더미 데이터입니다.
@@ -216,7 +217,23 @@ const ProfileCard = ({ onClick, name, xClick }) => {
     "TOEIC 850점",
   ];
   const licenses = dummyLicenses;
+*/
+  }
+  const keywords = profileData?.collaborationTags ?? [];
+  const licenses = profileData?.certificates ?? [];
+  const memberName = profileData?.name ?? "";
+  const major = profileData?.major ?? "";
+  const school = profileData?.school ?? "";
+  const email = profileData?.contactEmail ?? "";
+  const selfIntroduction = profileData?.selfIntroduction ?? "";
+  const grade = profileData?.grade ?? "";
 
+  const genderMap = {
+    //남여 변환 용
+    male: "남자",
+    female: "여자",
+  };
+  const gender = genderMap[profileData?.gender] ?? "";
   // 💡 핵심 로직: 화면에 그려줄 자격증 배열 가공하기
   const renderLicenses = () => {
     // 1. 자격증이 4개 이하인 경우: 있는 그대로 전부 보여줌
@@ -297,7 +314,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
                 margin: "0",
               }}
             >
-              김멋사
+              {memberName}
             </h2>
             <p
               style={{
@@ -316,7 +333,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
                 /* leading-trim: NONE 은 브라우저 기본값이므로 생략해도 무방합니다. */
               }}
             >
-              경영학과
+              {major}
             </p>
             <p
               style={{
@@ -325,7 +342,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
                 color: "#E3E3E3",
               }}
             >
-              인천대학교 | 2학년 | 남자
+              {school} | {grade} | {gender}
             </p>
             {/* 태그 및 하단 버튼 */}
             <KeywordRow>
@@ -385,14 +402,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
                 <img src="profile2.png" alt="자기소개 " />
                 <Title>자기소개</Title>
               </div>
-              <IntroductionText>
-                {/* 나중에 백엔드 데이터로 대체될 영역 */}
-                다양한 팀 프로젝트를 경험하며 쌓은 노하우로 팀원들에게 먼저
-                다가가는 리더입니다! 최근에는 데이터 분석으로 팀의 의사결정
-                돕고, 모두가 즐겁게 몰입할 수 있는 환경을 만드는 것에
-                자신있습니다. 든든한 팀워크를 바탕으로 만족스러운 결과물을 함께
-                만들어가고 싶습니다.
-              </IntroductionText>
+              <IntroductionText>{selfIntroduction}</IntroductionText>
             </Array>
             <NextButton onClick={onClick} name={name} />
             <Mail>
@@ -401,7 +411,7 @@ const ProfileCard = ({ onClick, name, xClick }) => {
                 src="send.svg"
                 alt="이메일 아이콘"
               />{" "}
-              이메일
+              {email}
             </Mail>
           </div>
         </SwiperSlide>
