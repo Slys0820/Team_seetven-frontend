@@ -348,7 +348,7 @@ function SignUp() {
     if (!isFormValid) return;
 
     // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
-    const formattedBirthDate = birthDate.replace(/\//g, "-"); // "2001/01/01" -> "2001-01-01"
+    const formattedBirthDate = birthDate.replace(/\//g, "/"); // "2001/01/01" -> "2001-01-01"
     const formattedGender = gender === "남자" ? "male" : "female"; // "남자" -> "male"
 
     try {
