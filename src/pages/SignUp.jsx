@@ -86,6 +86,24 @@ const InputBox = styled.input`
   }
 `;
 
+const SelectBox = styled.select`
+  width: 85%;
+  height: 2.8rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  outline: none;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-size: 0.85rem;
+  color: #1f2937;
+  background-color: #ffffff;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #818cf8;
+  }
+`;
+
 const GenderBox = styled.div`
   width: 85%;
   display: flex;
@@ -450,11 +468,15 @@ function SignUp() {
             />
 
             <InfoText>학년</InfoText>
-            <InputBox
-              placeholder="1"
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-            />
+            <SelectBox value={grade} onChange={(e) => setGrade(e.target.value)}>
+              <option value="" disabled hidden>
+                학년을 선택해 주세요.
+              </option>
+              <option value="1">1학년</option>
+              <option value="2">2학년</option>
+              <option value="3">3학년</option>
+              <option value="4">4학년</option>
+            </SelectBox>
 
             <InfoText>비밀번호</InfoText>
             <InputBox

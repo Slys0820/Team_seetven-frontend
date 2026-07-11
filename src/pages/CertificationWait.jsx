@@ -176,7 +176,7 @@ function CertificationWait() {
       }
     };
 
-    // 최초 컴포넌트 마운트 시 즉시 실행 후, 5초 주기로 반복 작동
+    // 최초 컴포넌트 마운트 시 즉시 실행 후, n초 주기로 반복 작동
     checkStatus();
     const intervalId = setInterval(checkStatus, 60000);
 
