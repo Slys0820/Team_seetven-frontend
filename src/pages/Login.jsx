@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import instance from "../api/axios";
 
 const Box = styled.div`
   display: flex;
@@ -259,21 +260,69 @@ function Login() {
   const [password, setPassword] = useState("");
   const [isError, setIsError] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // 비밀번호 보이기/숨기기 토글 상태
+  const [autoLogin, setAutoLogin] = useState(false);
 
-  const handleLogin = () => {
+  const [errorMessage, setErrorMessage] = useState("");
+  // 💡 비동기 통신을 위해 async 키워드를 붙입니다.
+  const handleLogin = async () => {
+    // 1. 프론트엔드 자체 유효성 검사 (빈 칸 입력 방지)
     if (email.trim() === "" || password.trim() === "") {
       setIsError(true);
+      setErrorMessage("이메일과 비밀번호를 모두 입력해 주세요.");
       return;
     }
 
-    if (email === "test@naver.com" && password === "1234") {
-      setIsError(false);
-      navigate("/main");
-    } else {
+    try {
+      // 💡 2. 메소드 POST로 명세서 형식 맞춰 전송
+      const response = await instance.post("/api/login", {
+        email: email,
+        password: password,
+        autoLogin: autoLogin,
+      });
+
+      // 💡 3. 성공 (상태코드 200 OK 및 백엔드 성공 플래그 확인)
+      if (response.data && response.data.isSuccess && response.data.result) {
+        const token = response.data.result.accessToken;
+
+        localStorage.setItem("token", token);
+        setIsError(false);
+        setErrorMessage("");
+        navigate("/main"); // 메인으로 리다이렉트
+      } else {
+        setIsError(true);
+        setErrorMessage("로그인 처리 중 알 수 없는 오류가 발생했습니다.");
+      }
+    } catch (error) {
+      // 💡 4. 백엔드가 에러 상태 코드를 보냈을 때 (catch 구문에서 처리)
       setIsError(true);
+
+      // 서버가 응답을 보냈을 때 (400, 401 등)
+      if (error.response) {
+        const status = error.response.status; // HTTP 상태 코드 (400, 401 등)
+        const serverMessage = error.response.data?.message; // 백엔드가 보낸 에러 메시지 텍스트
+
+        if (status === 400) {
+          // 상태코드 400: 요청 형식 올바르지 않음 (예: 이메일 형식이 아님 등)
+          setErrorMessage(serverMessage || "올바른 이메일 형식이 아닙니다.");
+        } else if (status === 401) {
+          // 상태코드 401: 이메일, 비번 미일치
+          setErrorMessage(
+            serverMessage || "이메일 또는 비밀번호를 다시 확인해 주세요."
+          );
+        } else {
+          // 그 외 500 등 서버 자체 에러
+          setErrorMessage(
+            "서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+          );
+        }
+      } else {
+        // 서버가 아예 죽어있거나 네트워크가 끊겼을 때
+        setErrorMessage("네트워크 연결이 원활하지 않습니다.");
+      }
+
+      console.error("로그인 실패 에러 내역:", error);
     }
   };
-
   return (
     <>
       <Box>
@@ -320,8 +369,14 @@ function Login() {
 
           {/* 옵션 구역 */}
           <OptionRow>
+            {/* 💡 4. 체크박스 상태와 onChange 이벤트를 연결합니다. */}
             <label className="checkbox-label">
-              <input type="checkbox" /> 자동 로그인
+              <input
+                type="checkbox"
+                checked={autoLogin}
+                onChange={(e) => setAutoLogin(e.target.checked)}
+              />{" "}
+              자동 로그인
             </label>
             <div className="find-pwd">
               비밀번호 찾기 <span className="arrow">&gt;</span>
@@ -329,11 +384,7 @@ function Login() {
           </OptionRow>
 
           {/* 로그인 수행 버튼 */}
-          {isError && (
-            <ErrorMessage>
-              아이디 또는 비밀번호를 다시 확인해 주세요.
-            </ErrorMessage>
-          )}
+          {isError && <ErrorMessage>{errorMessage}</ErrorMessage>}
           <LoginButton onClick={handleLogin}>로그인</LoginButton>
 
           {/* 구분선 */}

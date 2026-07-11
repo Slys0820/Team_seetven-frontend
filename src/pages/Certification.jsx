@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PurpleHeader from "../components/PurpleHeader";
-
+import instance from "../api/axios";
 const Box = styled.div`
   display: flex;
   flex-direction: column;
@@ -177,15 +177,61 @@ function Certification() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!selectedFile) return; // 파일이 없으면 실행 안 함
+  // 2️⃣ [실제 연동용] 백엔드 명세서 규격에 맞춘 에러 처리 적용
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedFile) return;
 
-    // 원래는 여기서 백엔드로 FormData를 보내는 API 통신을 하겠죠?
-    alert("서류 제출이 완료되었습니다!");
+    // 명세서 규격에 맞게 멀티파트 폼 데이터 생성
+    const formData = new FormData();
+    formData.append("file", selectedFile); // 명세서 요구 Key: file
 
-    navigate("/wait"); // 여기 승인 대기중 페이지로 교체 해야 함
+    try {
+      const response = await instance.post(
+        "/api/auth/school-verification",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // 성공 시 처리 (상태코드 200 OK)
+      // 백엔드가 결과 성공 여부를 주는 필드명(예: isSuccess)에 맞춰 조율하세요.
+      if (response.data) {
+        alert(
+          response.data.message || "인증 서류가 성공적으로 제출되었습니다."
+        );
+        navigate("/wait");
+      }
+    } catch (error) {
+      if (error.response) {
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+
+        // 명세서 기반 수동 에러 처리 영역
+        if (status === 400) {
+          // VERIFICATION_400 처리
+          alert(
+            serverMessage || "첨부된 서류가 없거나 형식이 올바르지 않습니다."
+          );
+        } else if (status === 401) {
+          // COMMON_401 처리
+          alert(serverMessage || "인증이 필요합니다. 다시 로그인해 주세요.");
+          localStorage.removeItem("token");
+          navigate("/login"); // 필요 시 로그인 페이지로 강제 리다이렉트
+        } else {
+          // 그 외 서버 에러 (500 등)
+          alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+      } else {
+        // 서버가 켜져 있지 않거나 네트워크가 완전히 끊긴 경우
+        alert("서버와 연결할 수 없습니다. 네트워크 상태를 확인해주세요.");
+      }
+      console.error("학교 인증 통신 실패 내역:", error);
+    }
   };
-
   return (
     <>
       <PurpleHeader title="학교 인증" type="type1" root="/signup" />
@@ -264,6 +310,7 @@ function Certification() {
         <SubmitButton
           onClick={handleSubmit}
           className={selectedFile ? "ready" : ""}
+          disabled={!selectedFile}
         >
           제출하기
         </SubmitButton>
