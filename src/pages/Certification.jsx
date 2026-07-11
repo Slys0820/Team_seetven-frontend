@@ -41,13 +41,14 @@ const TitleArea = styled.div`
 
   h2 {
     font-size: 1.4rem;
-    font-weight: bold;
+    font-weight: 600; /* 💡 bold에서 세미볼드(600)로 수정 */
     line-height: 1.4;
     margin: 0;
     color: #111111;
   }
   span {
     color: #6366f1; /* 보라색 강조 문구 */
+    font-weight: bold; /* 💡 보라색 글씨는 볼드(bold 또는 700)로 추가 */
   }
   p {
     font-size: 0.85rem;
