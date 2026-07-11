@@ -100,7 +100,7 @@ function PostInfo({ isClosed, title, name, date, onClick }) {
     <CardWrapper onClick={onClick}>
       {/* 상단: 뱃지 및 제목 */}
       <TopRow>
-        <Badge isClosed={isClosed}>{isClosed ? "마감" : "모집중"}</Badge>
+        <Badge isClosed={isClosed}>{isClosed ? "모집마감" : "모집중"}</Badge>
         <Title>{title}</Title>
       </TopRow>
 

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+// 📌 우리가 만든 공통 인스턴스(instance)를 가져옵니다.
+import instance from "../api/axios";
 import PurpleHeader from "../components/PurpleHeader";
-import { DummyData } from "../data/DummyData";
 
+// --- Styled Components 영역 (기존 스타일 유지) ---
 const Box = styled.div`
   width: 100%;
   min-height: 100dvh;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding-bottom: 100px; /* 하단 바 여백 */
+  padding-bottom: 100px;
   box-sizing: border-box;
 `;
 
@@ -20,7 +22,6 @@ const ContentBox = styled.div`
   flex-direction: column;
 `;
 
-// 카테고리 태그 (연보라 배경 + 보라 글씨)
 const CategoryTag = styled.span`
   background-color: #7063e3;
   color: #f6f5ff;
@@ -39,7 +40,6 @@ const Title = styled.h2`
   margin: 0 0 14px 0;
 `;
 
-// 메타 정보 영역
 const MetaInfoRow = styled.div`
   display: flex;
   justify-content: space-between;
@@ -55,14 +55,12 @@ const MetaInfoRow = styled.div`
   }
 `;
 
-// 글 정보, 내용 사이 회색 구분선
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid #e7eaf1;
   margin: 0 0 24px 0;
 `;
 
-// 모집정보, 내용 옆의 보라색 기둥
 const SectionTitle = styled.div`
   font-size: 1.1rem;
   font-weight: bold;
@@ -74,9 +72,8 @@ const SectionTitle = styled.div`
   align-items: center;
 `;
 
-// 모집 정보, 내용 테두리
 const InfoTableBox = styled.div`
-  border: none; /* 테두리*/
+  border: none;
   box-shadow: 0px 0px 2px 0px #7063e3;
   border-radius: 16px;
   padding: 10px 18px;
@@ -129,7 +126,6 @@ const TableRow = styled.div`
   }
 `;
 
-// 따옴표가 들어간 본문 내용 박스
 const ContentDetailBox = styled.div`
   border: 1px solid #eef2ff;
   border-radius: 16px;
@@ -160,7 +156,6 @@ const ContentDetailBox = styled.div`
   }
 `;
 
-// 하단 고정 바
 const FixedBottomBar = styled.div`
   position: fixed;
   bottom: 0;
@@ -176,7 +171,6 @@ const FixedBottomBar = styled.div`
   z-index: 100;
 `;
 
-// 단독 지원 버튼
 const FullApplyButton = styled.button`
   width: 100%;
   height: 54px;
@@ -195,58 +189,116 @@ const FullApplyButton = styled.button`
 `;
 
 function Post() {
-  const { id } = useParams();
+  const { id: postId } = useParams();
   const navigate = useNavigate();
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isApplied, setIsApplied] = useState(false);
 
-  // 1. 데이터 패칭용 useEffect
+  // 1. 모집글 상세 조회 API (GET) + 명세서 맞춤 예외 처리 추가
   useEffect(() => {
     const fetchPostData = async () => {
       setLoading(true);
       try {
-        const serverData = DummyData.find((p) => p.id === Number(id));
+        const response = await instance.get(`/api/posts/${postId}`);
 
-        if (serverData) {
-          setPost(serverData);
-          setIsApplied(serverData.isApplied ?? false);
+        if (response.data) {
+          setPost(response.data);
+          setIsApplied(response.data.hasApplied ?? false);
         } else {
           setPost(null);
         }
       } catch (error) {
+        if (error.response) {
+          const status = error.response.status;
+
+          // 💡 401 에러 핸들링 (토큰 만료 / 없음)
+          if (status === 401) {
+            const serverMessage =
+              error.response.data?.message || "인증이 필요합니다.";
+            alert(serverMessage);
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+
+          // 💡 404 에러 핸들링 (잘못된 postId / 존재하지 않는 모집글)
+          if (status === 404) {
+            const serverMessage =
+              error.response.data?.message || "존재하지 않는 모집글입니다.";
+            alert(serverMessage);
+            setPost(null);
+            navigate("/wholepost");
+            return;
+          }
+        }
+
         console.error("데이터 로딩 실패:", error);
+        setPost(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPostData();
-  }, [id]);
+    if (postId) {
+      fetchPostData();
+    }
+  }, [postId, navigate]);
 
-  // 📌 2. 타이머 제어용 useEffect (순서를 위로 끌어올려 Early Return과의 충돌을 예방합니다)
+  // 2. 예외 처리용 타이머 (데이터가 없을 때 리다이렉트 보호막)
   useEffect(() => {
     let timer;
     if (!post && !loading) {
       timer = setTimeout(() => {
         navigate("/wholepost");
-      }, 1000);
+      }, 1500);
     }
     return () => clearTimeout(timer);
   }, [post, loading, navigate]);
 
-  // 지원하기 클릭 핸들러
-  const handleApplyClick = () => {
+  // 3. 지원하기 등록 API (POST) + 토큰 만료 처리 추가
+  const handleApplyClick = async () => {
     if (
-      window.confirm("정말 지원하시겠습니까? 지원한 후에는 취소할 수 없습니다.")
+      !window.confirm(
+        "정말 지원하시겠습니까? 지원한 후에는 취소할 수 없습니다."
+      )
     ) {
-      setIsApplied(true);
-      alert("지원이 완료되었습니다!");
+      return;
+    }
+
+    try {
+      const response = await instance.post(`/api/posts/${postId}/apply`, {});
+
+      if (response.status === 200 || response.status === 201) {
+        alert("지원이 완료되었습니다!");
+        setIsApplied(true);
+      }
+    } catch (error) {
+      console.error("지원하기 실패:", error);
+
+      if (error.response) {
+        // 💡 지원 요청 도중 토큰이 만료된 경우 (401)
+        if (error.response.status === 401) {
+          const serverMessage =
+            error.response.data?.message || "인증이 필요합니다.";
+          alert(serverMessage);
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+
+        if (error.response.data?.message) {
+          alert(`지원 실패: ${error.response.data.message}`);
+          return;
+        }
+      }
+
+      alert("지원 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
     }
   };
 
-  // 3. 로딩 상태 렌더링 (모든 Hook 정의보다 반드시 아래에 있어야 함)
+  // 4. 로딩 상태 렌더링
   if (loading) {
     return (
       <Box>
@@ -262,7 +314,7 @@ function Post() {
     );
   }
 
-  // 4. 데이터 없을 때 예외 렌더링
+  // 5. 에러 및 데이터 부재 예외 렌더링
   if (!post) {
     return (
       <Box>
@@ -274,14 +326,16 @@ function Post() {
           <p
             style={{ fontSize: "0.85rem", color: "#9ca3af", marginTop: "10px" }}
           >
-            1초 후에 전체 모집 글 페이지로 이동합니다.
+            잠시 후 전체 모집 글 페이지로 이동합니다.
           </p>
         </ContentBox>
       </Box>
     );
   }
 
-  // 5. 정상 렌더링
+  const isClosed = post.postStatus === "모집마감";
+
+  // 6. 정상 데이터 렌더링
   return (
     <Box>
       <PurpleHeader title="모집 상세 정보" root={-1} />
@@ -293,11 +347,11 @@ function Post() {
         <MetaInfoRow>
           <div className="left-meta">
             <span>
-              <img src="../person.svg" alt="유저" /> {post.name}
+              <img src="../person.svg" alt="유저" /> {post.authorName}
             </span>
             <span>•</span>
             <span>
-              <img src="../calender.svg" alt="날짜" /> {post.date}
+              <img src="../calender.svg" alt="날짜" /> {post.createdAt}
             </span>
           </div>
         </MetaInfoRow>
@@ -315,11 +369,11 @@ function Post() {
             </div>
             <a
               className="link"
-              href={post.announcement}
+              href={post.announcementLink}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {post.announcement}
+              {post.announcementLink}
             </a>
           </TableRow>
           <TableRow>
@@ -329,7 +383,7 @@ function Post() {
               </div>
               <span>모집 분야</span>
             </div>
-            <div className="value">{post.category}·아이디어</div>
+            <div className="value">{post.category} · 아이디어</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
@@ -347,7 +401,7 @@ function Post() {
               </div>
               <span>모집 인원</span>
             </div>
-            <div className="value">{post.memberCount}</div>
+            <div className="value">{post.recruitmentCount}명</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
@@ -356,7 +410,7 @@ function Post() {
               </div>
               <span>활동 방식</span>
             </div>
-            <div className="value">{post.method}</div>
+            <div className="value">{post.activityMethod}</div>
           </TableRow>
           <TableRow>
             <div className="label-group">
@@ -365,7 +419,7 @@ function Post() {
               </div>
               <span>활동 목적</span>
             </div>
-            <div className="value">{post.purpose}</div>
+            <div className="value">{post.activityPurpose}</div>
           </TableRow>
         </InfoTableBox>
 
@@ -389,10 +443,10 @@ function Post() {
 
       <FixedBottomBar>
         <FullApplyButton
-          disabled={post.isClosed || isApplied}
+          disabled={isClosed || isApplied}
           onClick={handleApplyClick}
         >
-          {post.isClosed ? "모집 마감" : isApplied ? "지원 완료" : "지원하기"}
+          {isClosed ? "모집 마감" : isApplied ? "지원 완료" : "지원하기"}
         </FullApplyButton>
       </FixedBottomBar>
     </Box>

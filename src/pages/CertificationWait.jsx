@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
+import instance from "../api/axios"; // 👈 axios 인스턴스 임포트
 
 // 🔄 빙글빙글 도는 회전 애니메이션 정의
 const rotate = keyframes`
@@ -25,8 +26,8 @@ const Box = styled.div`
 
 // 💡 내부 이미지들을 겹치기 위해 relative 설정
 const ImageArea = styled.div`
-  width: 20rem;
-  height: 20rem;
+  width: 15rem;
+  height: 15rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -40,16 +41,23 @@ const RotatingCircle = styled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
-  animation: ${rotate} 15s linear infinite; /* n초 동안 부드럽게 무한 회전 (속도는 원하시는 대로 조절 가능!) */
+  animation: ${rotate} 15s linear infinite;
 `;
 
 // 💡 2. 가만히 고정되어 있는 안쪽 발자국 이미지
 const FixedFeet = styled.img`
   position: absolute;
-  width: 60%; /* 원 크기에 맞춰 적절히 조절 가능 */
+  width: 60%;
   height: 60%;
   object-fit: contain;
   z-index: 2; /* 원보다 위에 오도록 설정 */
+`;
+
+// 💡 3. 실패 화면용 그래픽 이미지 (크기 최적화)
+const FailGraphic = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 `;
 
 const MainTitle = styled.h2`
@@ -139,9 +147,42 @@ function CertificationWait() {
   // 🚀 1. 여기서 status가 "success"가 되는 순간 캐치해서 다른 페이지로 바로 쏴버립니다.
   useEffect(() => {
     if (status === "success") {
-      navigate("/makeprofilecard"); // 원하는 경로 설정 완료!
+      navigate("/makeprofilecard");
     }
   }, [status, navigate]);
+
+  // 🌐 2. 백엔드에서 인증 상태를 실시간으로 가져오는 로직 (60초마다 주기적 갱신)
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const response = await instance.get(
+          "/api/auth/school-verification/status"
+        );
+
+        if (response.data && response.data.isSuccess) {
+          const serverStatus = response.data.result.verificationStatus;
+
+          if (serverStatus === "PENDING") {
+            setStatus("wait");
+          } else if (serverStatus === "APPROVED") {
+            setStatus("success");
+          } else if (serverStatus === "REJECTED") {
+            setStatus("fail");
+          }
+        }
+      } catch (error) {
+        console.error("인증 상태 조회 실패:", error);
+        // 토큰 만료(401) 등 특정 에러 분기가 필요하면 처리 가능
+      }
+    };
+
+    // 최초 컴포넌트 마운트 시 즉시 실행 후, 5초 주기로 반복 작동
+    checkStatus();
+    const intervalId = setInterval(checkStatus, 60000);
+
+    // 사용자가 페이지를 벗어나면 타이머를 청소(Clean-up)하여 메모리 누수 방지
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleRetry = () => {
     navigate("/certification");
@@ -168,7 +209,7 @@ function CertificationWait() {
       {status === "fail" && (
         <>
           <ImageArea style={{ marginTop: "auto" }}>
-            <img src="./fail.svg" alt="인증 실패 그래픽" />
+            <FailGraphic src="./fail.svg" alt="인증 실패 그래픽" />
           </ImageArea>
 
           <MainTitle $status={status}>
