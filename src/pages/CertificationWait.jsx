@@ -75,6 +75,21 @@ const MainTitle = styled.h2`
   }
 `;
 
+const MainTitleFail = styled.h2`
+  width: 95%;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #060606; /* 💡 기본 글자 색상을 검은색 계열로 수정 */
+  margin: 0 0 10px 0;
+
+  /* status가 'wait'이면 center, 아니면(fail 등) left로 정렬 */
+  text-align: ${({ $status }) => ($status === "wait" ? "center" : "left")};
+
+  span.highlight {
+    color: #4e39f1; /* 💡 보라색 강조 문구 유지 */
+  }
+`;
+
 const SubDescription = styled.p`
   width: 95%;
   font-size: 1rem;
@@ -98,7 +113,7 @@ const FailGuideBox = styled.div`
   p {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #8072eb;
+    color: #4e39f1;
     margin: 0 0 12px 0;
   }
 
@@ -111,7 +126,7 @@ const FailGuideBox = styled.div`
   li {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #555555;
+    color: #747474;
     margin-bottom: 6px;
     line-height: 1.5;
 
@@ -212,9 +227,9 @@ function CertificationWait() {
             <FailGraphic src="./fail.svg" alt="인증 실패 그래픽" />
           </ImageArea>
 
-          <MainTitle $status={status}>
+          <MainTitleFail $status={status}>
             인증에 <span className="highlight">실패</span>했어요...
-          </MainTitle>
+          </MainTitleFail>
 
           <SubDescription $status={status}>
             필수로 인증해야 하는 항목을 다시 확인해 주세요.
