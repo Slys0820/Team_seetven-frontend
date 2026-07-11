@@ -3,7 +3,9 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PurpleHeader from "../components/PurpleHeader";
 import instance from "../api/axios";
-const Box = styled.div`
+
+// form 태그로 변경하여 웹 표준 및 전송 흐름 최적화
+const Box = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,7 +29,6 @@ const BadgeIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-self: flex-start; /* 왼쪽 정렬 */
   margin-bottom: 20px;
   color: #6366f1;
   font-size: 1.5rem;
@@ -41,14 +42,14 @@ const TitleArea = styled.div`
 
   h2 {
     font-size: 1.4rem;
-    font-weight: 600; /* 💡 bold에서 세미볼드(600)로 수정 */
+    font-weight: 600;
     line-height: 1.4;
     margin: 0;
     color: #111111;
   }
   span {
-    color: #6366f1; /* 보라색 강조 문구 */
-    font-weight: bold; /* 💡 보라색 글씨는 볼드(bold 또는 700)로 추가 */
+    color: #6366f1;
+    font-weight: bold;
   }
   p {
     font-size: 0.85rem;
@@ -79,15 +80,21 @@ const FileUploadBox = styled.label`
   box-sizing: border-box;
   cursor: pointer;
   margin-bottom: 8px;
-  flex-shrink: 0; //다른 요소에 의해 영향 x
+  flex-shrink: 0;
 
   span {
     font-size: 0.85rem;
-    color: #b0b0b0;
+    color: ${(props) => (props.$hasFile ? "#111111" : "#b0b0b0")}; /* 파일 선택 시 글자색 어둡게 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 파일명이 너무 길 때 말줄임 처리 */
+    padding-right: 10px;
   }
   .icon {
     color: #6366f1;
     font-weight: bold;
+    display: flex;
+    align-items: center;
   }
 `;
 
@@ -111,13 +118,15 @@ const InfoGuideBox = styled.div`
   padding: 15px;
   box-sizing: border-box;
   text-align: left;
-  margin-bottom: auto; /* 남은 공간을 밀어내서 버튼을 바닥 쪽으로 유도 */
+  margin-bottom: auto;
 
   h4 {
     font-size: 0.85rem;
     font-weight: bold;
     color: #4c1d95;
     margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
   }
 
   ul {
@@ -132,7 +141,12 @@ const InfoGuideBox = styled.div`
     margin-bottom: 6px;
     line-height: 1.4;
     display: flex;
+    align-items: flex-start;
     gap: 6px;
+
+    img {
+      margin-top: 2px;
+    }
 
     &:last-child {
       margin-bottom: 0;
@@ -144,20 +158,16 @@ const InfoGuideBox = styled.div`
 const SubmitButton = styled.button`
   width: 100%;
   height: 3rem;
-  background-color: #c4c4c4; /* 비활성화 기본 회색, 시안에 맞춤 */
+  background-color: #c4c4c4;
   color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: bold;
-  cursor: pointer;
-  margin-top: 20px;
-  flex-shrink: 0; //다른 요소에 의해 영향 x
-
-  //비활성 상태
   cursor: not-allowed;
+  margin-top: 20px;
+  flex-shrink: 0;
 
-  //활성 상태
   &.ready {
     background-color: #7063e3;
     box-shadow: 0 4px 10px rgba(129, 140, 248, 0.3);
@@ -170,22 +180,20 @@ function Certification() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]; // 유저가 선택한 첫 번째 파일
+    const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file); // 파일이 있으면 상태에 저장
+      setSelectedFile(file);
     } else {
-      setSelectedFile(null); // 취소했으면 다시 null
+      setSelectedFile(null);
     }
   };
 
-  // 2️⃣ [실제 연동용] 백엔드 명세서 규격에 맞춘 에러 처리 적용
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedFile) return;
 
-    // 명세서 규격에 맞게 멀티파트 폼 데이터 생성
     const formData = new FormData();
-    formData.append("file", selectedFile); // 명세서 요구 Key: file
+    formData.append("file", selectedFile);
 
     try {
       const response = await instance.post(
@@ -198,48 +206,43 @@ function Certification() {
         }
       );
 
-      // 성공 시 처리 (상태코드 200 OK)
-      // 백엔드가 결과 성공 여부를 주는 필드명(예: isSuccess)에 맞춰 조율하세요.
       if (response.data) {
         alert(
           response.data.message || "인증 서류가 성공적으로 제출되었습니다."
         );
-        navigate("/wait");
+        navigate("/wait"); // 제출 성공 시 대기 화면으로 연계 이동
       }
     } catch (error) {
       if (error.response) {
         const status = error.response.status;
         const serverMessage = error.response.data?.message;
 
-        // 명세서 기반 수동 에러 처리 영역
         if (status === 400) {
-          // VERIFICATION_400 처리
           alert(
             serverMessage || "첨부된 서류가 없거나 형식이 올바르지 않습니다."
           );
         } else if (status === 401) {
-          // COMMON_401 처리
           alert(serverMessage || "인증이 필요합니다. 다시 로그인해 주세요.");
           localStorage.removeItem("token");
-          navigate("/login"); // 필요 시 로그인 페이지로 강제 리다이렉트
+          navigate("/login");
         } else {
-          // 그 외 서버 에러 (500 등)
           alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
         }
       } else {
-        // 서버가 켜져 있지 않거나 네트워크가 완전히 끊긴 경우
         alert("서버와 연결할 수 없습니다. 네트워크 상태를 확인해주세요.");
       }
       console.error("학교 인증 통신 실패 내역:", error);
     }
   };
+
   return (
     <>
       <PurpleHeader title="학교 인증" type="type1" root="/signup" />
-      <Box>
+      {/* onSubmit을 form 태그 자체에 바인딩 */}
+      <Box onSubmit={handleSubmit}>
         <div style={{ width: "100%", display: "flex", marginTop: "5rem" }}>
           <BadgeIcon>
-            <img src="./security.png" />
+            <img src="./security.png" alt="보안 아이콘" />
           </BadgeIcon>
         </div>
 
@@ -256,15 +259,16 @@ function Certification() {
 
         <SubTitle>인증 서류 첨부</SubTitle>
 
-        {/* 실제 파일 인풋은 숨기고 label로 커스텀 디자인 구현 */}
         <input
           type="file"
           id="school-file"
           style={{ display: "none" }}
           onChange={handleFileChange}
+          accept="image/*,application/pdf" /* 이미지 파일 및 PDF만 선택 가능하도록 제한 조치 */
         />
 
-        <FileUploadBox htmlFor="school-file">
+        {/* 파일 선택 여부에 따라 $hasFile prop 전달 */}
+        <FileUploadBox htmlFor="school-file" $hasFile={!!selectedFile}>
           <span>{selectedFile ? selectedFile.name : "사진 선택하기"}</span>
           <span className="icon">
             <img
@@ -276,8 +280,8 @@ function Certification() {
         </FileUploadBox>
 
         <SecurityNotice>
-          <img src="lock2.png" /> 입력하신 정보는 학생 신분 확인 용도로만
-          사용되며, 승인 후 즉시 파기됩니다.
+          <img src="lock2.png" alt="자물쇠" /> 입력하신 정보는 학생 신분 확인
+          용도로만 사용되며, 승인 후 즉시 파기됩니다.
         </SecurityNotice>
 
         <InfoGuideBox>
@@ -285,31 +289,32 @@ function Certification() {
             <img
               src="./alert.png"
               style={{
-                transform: "scale(1.13)",
+                transform: "scale(1.13) translateY(2px)",
                 marginRight: "8px",
-                transform: "translateY(2px)",
               }}
+              alt="경고"
             />
             [ 인증 서류 첨부 안내 ]
           </h4>
           <ul>
             <li>
-              <img src="./check.png" /> 학생증 : 성명, 학교명, 학번, 사진이
-              포함된 앞면
+              <img src="./check.png" alt="체크" /> 학생증 : 성명, 학교명, 학번,
+              사진이 포함된 앞면
             </li>
             <li>
-              <img src="./check.png" /> 재학/휴학 증명서: 최근 1개월 이내에
-              발급된 서류
+              <img src="./check.png" alt="체크" /> 재학/휴학 증명서: 최근 1개월
+              이내에 발급된 서류
             </li>
             <li>
-              <img src="./check.png" />
+              <img src="./check.png" alt="체크" />
               포털 로그인 화면: 학교 로고와 이름이 함께 나오는 화면
             </li>
           </ul>
         </InfoGuideBox>
 
+        {/* 버튼 타입을 submit으로 지정하여 form의 onSubmit과 유기적으로 연계 */}
         <SubmitButton
-          onClick={handleSubmit}
+          type="submit"
           className={selectedFile ? "ready" : ""}
           disabled={!selectedFile}
         >
