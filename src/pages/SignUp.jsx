@@ -320,7 +320,8 @@ function SignUp() {
     if (!isFormValid) return;
 
     // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
-    const formattedBirthDate = birthDate.replace(/\//g, "-"); // "2001/01/01" -> "2001-01-01"
+    // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
+    const formattedBirthDate = birthDate.replace(/\//g, "/"); // "2002/02/02" -> "2002/02/02" 슬래시 포맷 유지
     const formattedGender = gender === "남자" ? "male" : "female"; // "남자" -> "male"
 
     // 2️⃣ [임시 확인용] 서버로 날아갈 최종 가공 데이터를 얼럿으로 확인!
