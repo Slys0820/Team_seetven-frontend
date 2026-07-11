@@ -2,10 +2,10 @@ import styled from "styled-components";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InvisibleHeader from "../components/InvisibleHeader";
-// 💡 로그인 때 만들어둔 axios 인스턴스를 임포트합니다. (경로는 프로젝트 구조에 맞게 수정)
+// 💡 로그인 때 만들어둔 axios 인스턴스를 사용합니다.
 import instance from "../api/axios";
 
-// 화면 뒷배경 및 전체 페이지 감싸는 박스
+// [스타일 컴포넌트 유지를 위해 기존 스타일 정의 생략 - 원본 그대로 적용됩니다]
 const PageWrapper = styled.div`
   background-color: #f9f7fc;
   width: 100%;
@@ -13,14 +13,11 @@ const PageWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-
   overflow-x: hidden;
-
   &::-webkit-scrollbar {
     display: none;
   }
 `;
-
 const Box = styled.div`
   background-color: #ffffff;
   box-shadow: 0px 0px 2px 0px #7063e3;
@@ -28,30 +25,27 @@ const Box = styled.div`
   border-radius: 8px;
   width: 90%;
   margin-top: 10px;
-  margin-bottom: 15px; /* 아래 에러문구/버튼과의 간격 */
+  margin-bottom: 15px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 24px 0;
 `;
-
 const ContainerBox = styled.div`
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 40px; /* 화면 맨 아래쪽 스크롤 여유 공간 */
+  padding-bottom: 40px;
 `;
-
 const Form = styled.form`
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
-
 const InfoText = styled.h2`
   font-size: 0.95rem;
   font-weight: bold;
@@ -59,12 +53,10 @@ const InfoText = styled.h2`
   text-align: left;
   color: #1f2937;
   margin: 18px 0 6px 0;
-
   &:first-of-type {
     margin-top: 10px;
   }
 `;
-
 const InputBox = styled.input`
   width: 85%;
   height: 2.8rem;
@@ -76,16 +68,13 @@ const InputBox = styled.input`
   font-size: 0.85rem;
   color: #1f2937;
   background-color: #ffffff;
-
   &::placeholder {
     color: #9ca3af;
   }
-
   &:focus {
     border-color: #818cf8;
   }
 `;
-
 const SelectBox = styled.select`
   width: 85%;
   height: 2.8rem;
@@ -98,19 +87,16 @@ const SelectBox = styled.select`
   color: #1f2937;
   background-color: #ffffff;
   cursor: pointer;
-
   &:focus {
     border-color: #818cf8;
   }
 `;
-
 const GenderBox = styled.div`
   width: 85%;
   display: flex;
   gap: 12px;
   margin-top: 4px;
 `;
-
 const StyledGenderButton = styled.button`
   flex: 1;
   height: 2.8rem;
@@ -121,13 +107,10 @@ const StyledGenderButton = styled.button`
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
-
   &:hover {
     border-color: #818cf8;
     color: #7063e3;
   }
-
-  /* isActive가 true일 때 이 스타일 */
   &.active {
     border-color: #818cf8;
     background-color: #7063e3;
@@ -138,7 +121,6 @@ const StyledGenderButton = styled.button`
 
 const GenderButton = ({ gend, gender, setGender }) => {
   const isActive = gender === gend;
-
   return (
     <StyledGenderButton
       type="button"
@@ -156,15 +138,12 @@ const SubmitButton = styled.button`
   margin-top: 20px;
   border: none;
   border-radius: 12px;
-
-  /* 기본 비활성화 상태: 회색 */
   background-color: #d1d5db !important;
   color: white;
   font-size: 1rem;
   font-weight: bold;
   cursor: not-allowed;
   transition: all 0.3s ease;
-
   &.ready {
     background: linear-gradient(to right, #ada0f6, #8879d8) !important;
     box-shadow: 0 4px 10px rgba(129, 140, 248, 0.3);
@@ -177,14 +156,12 @@ const LogoArea = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 40px;
-
   img {
     width: 40rem;
     height: 10rem;
     object-fit: cover;
     margin-bottom: 0rem;
   }
-
   p {
     font-size: 1rem;
     font-weight: bold;
@@ -196,7 +173,6 @@ const LogoArea = styled.div`
 function SignUp() {
   const navigate = useNavigate();
 
-  // 1. 입력값 상태들
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -210,7 +186,7 @@ function SignUp() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // 실시간 유효성 검사 로직
+  // 실시간 유효성 검사 로직 (기존 코드 완벽 유지)
   useEffect(() => {
     const hasSpecialChar = (text) => /[^a-zA-Z가-힣0-9\s]/.test(text);
     const hasSpace = (text) => /\s/.test(text);
@@ -233,16 +209,16 @@ function SignUp() {
       return;
     }
 
-    if (name) {
-      if (hasSpace(name) || hasSpecialChar(name) || !isKoreanOrEnglish(name)) {
-        setErrorMessage(
-          "이름은 공백이나 특수문자 없이 한글 또는 영문만 가능합니다."
-        );
-        setIsFormValid(false);
-        return;
-      }
+    if (
+      name &&
+      (hasSpace(name) || hasSpecialChar(name) || !isKoreanOrEnglish(name))
+    ) {
+      setErrorMessage(
+        "이름은 공백이나 특수문자 없이 한글 또는 영문만 가능합니다."
+      );
+      setIsFormValid(false);
+      return;
     }
-
     if (email) {
       if (hasSpace(email)) {
         setErrorMessage("이메일에는 공백을 입력할 수 없습니다.");
@@ -255,15 +231,11 @@ function SignUp() {
         return;
       }
     }
-
-    if (birthDate) {
-      if (!birthRegex.test(birthDate)) {
-        setErrorMessage("생년월일은 YYYY/MM/DD 형식으로 입력해야 합니다.");
-        setIsFormValid(false);
-        return;
-      }
+    if (birthDate && !birthRegex.test(birthDate)) {
+      setErrorMessage("생년월일은 YYYY/MM/DD 형식으로 입력해야 합니다.");
+      setIsFormValid(false);
+      return;
     }
-
     if (school && hasSpecialChar(school)) {
       setErrorMessage("소속 학교에는 특수문자를 입력할 수 없습니다.");
       setIsFormValid(false);
@@ -274,7 +246,6 @@ function SignUp() {
       setIsFormValid(false);
       return;
     }
-
     if (grade) {
       const numericGrade = parseInt(grade.replace(/[^0-9]/g, ""), 10);
       if (isNaN(numericGrade) || numericGrade < 1 || numericGrade > 4) {
@@ -283,7 +254,6 @@ function SignUp() {
         return;
       }
     }
-
     if (password) {
       if (hasSpace(password)) {
         setErrorMessage("비밀번호에는 공백을 입력할 수 없습니다.");
@@ -296,7 +266,6 @@ function SignUp() {
         return;
       }
     }
-
     if (password && passwordCheck && password !== passwordCheck) {
       setErrorMessage("비밀번호가 서로 일치하지 않습니다.");
       setIsFormValid(false);
@@ -332,90 +301,63 @@ function SignUp() {
     passwordCheck,
   ]);
 
-  // 💡 백엔드 주소 나오기 전까지 사용하는 임시 테스트용 함수
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!isFormValid) return;
-
-    // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
-    // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
-    const formattedBirthDate = birthDate.replace(/\//g, "/"); // "2002/02/02" -> "2002/02/02" 슬래시 포맷 유지
-    const formattedGender = gender === "남자" ? "male" : "female"; // "남자" -> "male"
-
-    // 2️⃣ [임시 확인용] 서버로 날아갈 최종 가공 데이터를 얼럿으로 확인!
-    alert(
-      `[서버 전송 데이터 확인]\n` +
-        `이름: ${name}\n` +
-        `생년월일: ${formattedBirthDate}\n` +
-        `성별: ${formattedGender}\n` +
-        `학교: ${school}\n` +
-        `이메일: ${email}\n` +
-        `전공: ${major}\n` +
-        `학년: ${grade}\n` +
-        `비밀번호: ${password}\n` +
-        `비밀번호 재확인: ${passwordCheck}`
-    );
-
-    // 3️⃣ 주소가 없으니 일단 에러 없이 다음 페이지로 강제 이동 시켜보기
-    navigate("/certification");
-  };
-  /*
-  // 💡 백엔드 연동을 구현한 비동기 전송 함수
+  // 💡 백엔드 실시간 통신 활성화 함수
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isFormValid) return;
 
     // 1️⃣ 백엔드 명세서 규격에 맞춰 데이터 포맷 가공하기
-    const formattedBirthDate = birthDate.replace(/\//g, "/"); // "2001/01/01" -> "2001-01-01"
-    const formattedGender = gender === "남자" ? "male" : "female"; // "남자" -> "male"
+    const formattedBirthDate = birthDate.replace(/\//g, "/");
+    const formattedGender = gender === "남자" ? "male" : "female";
 
     try {
-      // 2️⃣ 명세서의 Endpoint인 /api/auth/signup 으로 POST 요청 전송
+      // 2️⃣ 상대 경로를 통해 프록시를 타도록 인스턴스 호출 (전공과 학년 변수도 추가 누락없이 반영)
       const response = await instance.post("/api/auth/signup", {
         name,
         birthDate: formattedBirthDate,
         gender: formattedGender,
         school,
         email,
+        major,
+        grade: parseInt(grade, 10), // 숫자로 요구할 경우를 대비해 파싱 처리
         password,
         passwordCheck,
       });
 
-      // 3️⃣ 상태코드 200 성공 분기 처리
+      // 3️⃣ 성공 분기 처리
       if (response.data && response.data.isSuccess) {
         alert(response.data.message || "회원가입이 완료되었습니다! 🎉");
-        navigate("/certification"); // 학교 인증 대기 페이지로 이동
+        navigate("/certification");
       } else {
         setErrorMessage("회원가입 처리 중 알 수 없는 오류가 발생했습니다.");
       }
     } catch (error) {
-      // 4️⃣ 백엔드 에러 상태코드 예외 분기 처리 (400, 409 등)
+      // 4️⃣ 서버측 에러 상태코드 예외 대응
       if (error.response) {
         const status = error.response.status;
         const serverMessage = error.response.data?.message;
 
         if (status === 409) {
-          // 상태코드 409: 이메일 중복 (MEMBER_409)
           setErrorMessage(serverMessage || "이미 가입된 이메일입니다.");
         } else if (status === 400) {
-          // 상태코드 400: 입력 형식 검증 실패
           setErrorMessage(serverMessage || "입력 형식이 올바르지 않습니다.");
         } else {
-          // 그 외 서버측 500 오류 등
-          setErrorMessage("서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+          setErrorMessage(
+            "서버에 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+          );
         }
       } else {
-        // 네트워크 연결 에러 등
-        setErrorMessage("네트워크 연결이 불안정합니다. 인터넷 환경을 확인해 주세요.");
+        setErrorMessage(
+          "네트워크 연결이 불안정합니다. 인터넷 환경을 확인해 주세요."
+        );
       }
       console.error("회원가입 통신 실패 내역:", error);
     }
   };
-*/
+
   return (
     <PageWrapper>
       <InvisibleHeader title="회원가입" />
-
       <ContainerBox>
         <Form onSubmit={handleSubmit}>
           <Box>
