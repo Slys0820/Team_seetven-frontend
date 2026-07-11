@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useNavigate, useEffect } from "react-router-dom";
 import PurpleHeaderNoBack from "../components/PurpleHeaderNoBack";
 import { useState } from "react";
+import axios from "axios";
 
 const InputBox = styled.input`
   width: 100%;
@@ -186,7 +187,7 @@ const Array = styled.div`
 
 // 메인 함수
 function MakeProfileCard() {
-  const [career, setCareer] = useState("");
+  const [career, setCareer] = useState([]);
   const [intruduction, setIntroduction] = useState("");
   const [selectedTendency, setSelectedTendency] = useState([]);
   const [careers, setCareers] = useState("");
@@ -237,6 +238,30 @@ function MakeProfileCard() {
     // 클릭한 id를 가진 객체만 쏙 빼고 필터링
     setCareers(careers.filter((item) => item.id !== id));
   };
+
+  const PostInformation = async () => {
+    try {
+      // 서버로 보내줄 데이터
+      const ProfileinInfo = {
+        certificates: careers.map((item) => item.text),
+        collaborationTags: selectedTendency,
+        selfIntroduction: intruduction,
+      };
+
+      // 서버에 POST 요청 보내기
+      const response = await axios.post("/api/profile", ProfileinInfo);
+
+      // 서버 응답이 잘 도착하면 아래 코드가 실행됨
+      // axios는 친절하게 알맹이를 '.data' 안에 넣어줌
+      console.log("프로필 생성 성공!", response.data);
+      navigate("/writeendtwo");
+    } catch (error) {
+      // 서버가 에러 객체를 뱉어내면 이쪽으로 빠짐
+      console.log("로그인 실패!", error);
+      alert("작성 실패!"); // 또는 error.response?.data?.message
+    }
+  };
+
   const navigate = useNavigate();
   return (
     <div style={{ height: "100%" }}>
@@ -369,7 +394,7 @@ function MakeProfileCard() {
           <WordCounter>{intruduction.length}/300자</WordCounter>
         </TextSet>
         <SubmitButton
-          onClick={() => navigate("/writeendtwo")}
+          onClick={PostInformation}
           className={
             intruduction && selectedTendency.length === 2 ? "ready" : ""
           }
