@@ -1,7 +1,8 @@
 import styled from "styled-components";
-import { useNavigate, useEffect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PurpleHeader from "../components/PurpleHeader";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const InputBox = styled.input`
   width: 100%;
@@ -192,13 +193,59 @@ const Array = styled.div`
 
 // 메인 함수
 function ReWrite() {
-  const [career, setCareer] = useState("");
+  const [email, setEmail] = useState("");
+  const [career, setCareer] = useState([]);
   const [intruduction, setIntroduction] = useState("");
   const [selectedTendency, setSelectedTendency] = useState([]);
-  const [careers, setCareers] = useState("");
-  const [email, setEmail] = useState("");
+  const [careers, setCareers] = useState([]);
+  const [name, setName] = useState("");
+  const [gender, setGender] = useState("");
   // 💡 [추가] 현재 화면이 수정 모드(2번)인지 조회 모드(1번)인지 저장하는 상태 (기본값: false = 조회 상태)
   const [isEdit, setIsEdit] = useState(false);
+  // 1️⃣ [GET]은 켜지자마자 실행되어야 하므로 useEffect 안에 넣음
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get("/api/profile/me"); // 백엔드에 GET 요청
+        const data = response.data;
+
+        // 💡 중요: 서버에서 받아온 기존 정보로 useState들을 미리 채워줍니다!
+        setEmail(data.email);
+        setIntroduction(data.selfIntroduction);
+        setSelectedTendency(data.collaborationTags);
+        setEmail(data.email);
+        setName(data.name);
+        setGender(data.gender);
+
+        // 자격증 정보가 문자열 배열(["ADsP"])로 온다면 객체 배열([{id, text}])로 변환해서 채우기
+        const mappedCareers = data.certificates.map((text, index) => ({
+          id: Date.now() + index,
+          text: text,
+        }));
+        setCareers(mappedCareers);
+      } catch (error) {
+        console.error("기존 프로필을 불러오지 못했습니다.", error);
+      }
+    };
+  }, []); // 딱 1번만 실행됨
+  // 2️⃣ [PATCH] 사용자가 수정한 후 [저장] 버튼을 누를 때 실행되는 함수
+  const handleSave = async () => {
+    try {
+      const updatedData = {
+        certificates: careers.map((item) => item.text),
+        selfIntroduction: intruduction,
+        collaborationTags: selectedTendency,
+      };
+
+      // 백엔드에 PATCH 요청을 보내서 갱신
+      await axios.patch("/api/profile", updatedData);
+      alert("수정이 완료되었습니다!");
+      // 💡 [정답!] 서버 저장에 성공했으므로, 수정 모드를 풀고 다시 '조회 모드'로 화면을 돌려놓습니다.
+      setIsEdit(false);
+    } catch (error) {
+      alert(error.response?.data?.message || "수정에 실패했습니다.");
+    }
+  };
 
   const tendencies = [
     "# 리더 ",
@@ -257,7 +304,7 @@ function ReWrite() {
         </InfoText>
         <P>이름</P>
         <InputBox
-          value="김멋사"
+          value={name}
           disabled
           style={{
             backgroundColor: "#f3f4f6",
@@ -267,7 +314,7 @@ function ReWrite() {
         />
         <P>성별</P>
         <InputBox
-          value="남자"
+          value={gender}
           disabled
           style={{
             backgroundColor: "#f3f4f6",
@@ -279,8 +326,12 @@ function ReWrite() {
         <InputBox
           onKeyDown={handleKeyDown}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={!isEdit} // 💡 수정 모드가 아닐 때는 이메일도 입력창 비활성화
+          disabled
+          style={{
+            backgroundColor: "#f3f4f6",
+            color: "#9ca3af",
+            cursor: "not-allowed",
+          }}
         />
 
         <Line></Line>
@@ -448,14 +499,9 @@ function ReWrite() {
         {isEdit ? (
           // ⭕ 수정 모드일 때는 [저장]용 버튼 노출 (기존 SubmitButton 활성화 로직 유지)
           <SubmitButton
-            onClick={() => {
-              // 여기에 백엔드 통신(axios.post 등) 코드가 들어갈 자리입니다.
-              setIsEdit(false); // 저장 완료 후 조회 모드로 탈출
-            }}
+            onClick={handleSave}
             className={
-              email.trim() && intruduction && selectedTendency.length === 2
-                ? "ready"
-                : ""
+              intruduction && selectedTendency.length === 2 ? "ready" : ""
             }
           >
             저장
