@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import PurpleHeader from "../components/PurpleHeader";
 import PostInfo from "../components/PostInfo";
 import PersonInfo from "../components/PersonInfo";
 import TagFilter from "../components/TagFilter";
 import { useNavigate } from "react-router-dom";
-
-// 데이터 구조 재활용 (추후 백엔드 연동)
-import { DummyData } from "../data/DummyData";
-import { UserDummyData } from "../data/UserDummyData";
+import api from "../api/axios"; // 💡 작성해주신 axios 인스턴스 import
 
 const PageContainer = styled.div`
   width: 100%;
@@ -28,7 +25,6 @@ const ListContainer = styled.div`
   overflow-y: auto;
 `;
 
-// 💡 키워드 필터 섹션 스타일 (보관함 시안 완벽 이식)
 const FilterSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -100,35 +96,87 @@ const EmptyMessage = styled.div`
 
 function MyTeam() {
   const navigate = useNavigate();
-  const [selectedPostId, setSelectedPostId] = useState(null);
 
-  // 💡 필터 관리를 위한 상태 2가지 원복!
+  // 상태 관리
+  const [myTeamPosts, setMyTeamPosts] = useState([]); // 내 팀 목록 상태
+  const [members, setMembers] = useState([]); // 선택된 팀의 팀원 목록 상태
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState([]); // 현재 선택 적용된 태그 배열
+  const [activeFilters, setActiveFilters] = useState([]);
 
-  // 1. 기본 상태용 팀 리스트 필터링
-  const myTeamPosts = DummyData.filter((post) => post.isUploaded === true);
+  // =========================================================
+  // 📡 [API 1] 내가 속한 팀 목록 조회 (컴포넌트 마운트 시 최초 1회 실행)
+  // =========================================================
+  useEffect(() => {
+    const fetchMyTeams = async () => {
+      try {
+        const response = await api.get("/api/teams/me");
+        if (response.data.isSuccess) {
+          setMyTeamPosts(response.data.result); // 명세서 규격의 배열 데이터 주입
+        }
+      } catch (error) {
+        console.error("My팀 목록을 불러오는데 실패했습니다.", error);
+        if (error.response?.status === 401) {
+          alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+          navigate("/login");
+        }
+      }
+    };
 
-  // 2. 선택된 팀 정보
-  const currentSelectedTeam = DummyData.find(
-    (post) => post.id === selectedPostId
+    fetchMyTeams();
+  }, [navigate]);
+
+  // =========================================================
+  // 📡 [API 2] 특정 팀 선택 시 해당 팀원 목록 조회
+  // =========================================================
+  useEffect(() => {
+    if (selectedTeamId === null) {
+      setMembers([]);
+      return;
+    }
+
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await api.get(`/api/teams/${selectedTeamId}/members`);
+        if (response.data.isSuccess) {
+          setMembers(response.data.result);
+        }
+      } catch (error) {
+        console.error("팀원 목록을 불러오는데 실패했습니다.", error);
+
+        // 💡 17번 팀원 목록 조회 전용 에러 코드로 완벽 수정!
+        if (error.response?.status === 401) {
+          alert("인증이 필요합니다.");
+        } else if (error.response?.status === 403) {
+          alert("해당 팀 소속이 아닙니다."); // TEAM_403 대응
+          setSelectedTeamId(null);
+        } else if (error.response?.status === 404) {
+          alert("존재하지 않는 팀입니다."); // TEAM_404 대응
+          setSelectedTeamId(null);
+        }
+      }
+    };
+
+    fetchTeamMembers();
+  }, [selectedTeamId]);
+
+  // 💡 선택된 팀의 상단 고정 노출용 데이터 추출
+  const currentSelectedTeam = myTeamPosts.find(
+    (team) => team.teamId === selectedTeamId
   );
 
-  // 3. 🚀 핵심: 선택된 팀의 팀원 중 + 선택한 필터 키워드를 가진 유저들만 실시간 필터링
-  const baseMembers = UserDummyData.filter(
-    (user) => user.postId === selectedPostId
-  );
-  const filteredMembers = baseMembers.filter((user) => {
-    if (activeFilters.length === 0) return true; // 필터 없으면 전체 노출
-    return user.tags.some((tag) => activeFilters.includes(tag)); // 태그 매칭 확인
+  // 💡 명세서의 `collaborationTags` 필드명을 활용한 실시간 클라이언트 사이드 필터링
+  const filteredMembers = members.filter((member) => {
+    if (activeFilters.length === 0) return true;
+    return member.collaborationTags.some((tag) => activeFilters.includes(tag));
   });
 
-  // 태그 개별 삭제 기능 (✕ 버튼 클릭 시)
+  // 태그 핸들러들
   const handleRemoveTag = (tagToRemove) => {
     setActiveFilters(activeFilters.filter((tag) => tag !== tagToRemove));
   };
 
-  // 모달 적용 버튼 눌렀을 때 부모 상태 업데이트 수신기
   const handleApplyFilters = (selectedTags) => {
     setActiveFilters(selectedTags);
     setIsFilterOpen(false);
@@ -136,23 +184,22 @@ function MyTeam() {
 
   return (
     <PageContainer>
-      {/* 헤더 글자 My팀 반영 */}
       <PurpleHeader title="My팀" root="/main" />
 
       <ListContainer>
-        {selectedPostId === null ? (
+        {selectedTeamId === null ? (
           /* =========================================================
-             [기본 상태] 왼쪽 시안: 내가 가진 팀 목록 주르륵 노출
+             [기본 상태] 내가 속한 팀 목록 주르륵 노출
              ========================================================= */
-          myTeamPosts.length > 0 ? (
-            myTeamPosts.map((post) => (
+          myTeamPosts && myTeamPosts.length > 0 ? (
+            myTeamPosts.map((team) => (
               <PostInfo
-                key={post.id}
-                isClosed={post.isClosed}
-                title={post.title}
-                name={post.name}
-                date={post.date}
-                onClick={() => setSelectedPostId(post.id)}
+                key={team.teamId}
+                isClosed={team.postStatus === "모집마감"}
+                title={team.title}
+                name={team.writerName}
+                date={team.createdAt}
+                onClick={() => setSelectedTeamId(team.teamId)}
               />
             ))
           ) : (
@@ -162,24 +209,24 @@ function MyTeam() {
           )
         ) : (
           /* =========================================================
-             [상세 상태] 오른쪽 시안: 클릭한 팀 정보 고정 + 키워드 필터 + 팀원 목록
+             [상세 상태] 클릭한 팀 정보 고정 + 키워드 필터 + 팀원 목록
              ========================================================= */
           <>
             {/* 상단 클릭된 팀 카드 고정 */}
             {currentSelectedTeam && (
               <PostInfo
-                isClosed={currentSelectedTeam.isClosed}
+                isClosed={currentSelectedTeam.postStatus === "모집마감"}
                 title={currentSelectedTeam.title}
-                name={currentSelectedTeam.name}
-                date={currentSelectedTeam.date}
+                name={currentSelectedTeam.writerName}
+                date={currentSelectedTeam.createdAt}
                 onClick={() => {
-                  setSelectedPostId(null);
+                  setSelectedTeamId(null);
                   setActiveFilters([]); // 리스트로 돌아갈 때 필터 초기화
                 }}
               />
             )}
 
-            {/* 💡 시안 반영 키워드 성향 필터 영역 */}
+            {/* 키워드 성향 필터 영역 */}
             <FilterSection>
               <FilterTitle>
                 <span role="img" aria-label="tag">
@@ -192,7 +239,6 @@ function MyTeam() {
                 키워드 성향 필터
               </FilterTitle>
               <TagRow>
-                {/* 선택된 태그들을 칩 형태로 출력하고 각각 X 버튼 연결 */}
                 {activeFilters.map((tag) => (
                   <ActiveTagChip key={tag}>
                     #{tag}
@@ -209,12 +255,14 @@ function MyTeam() {
             {filteredMembers.length > 0 ? (
               filteredMembers.map((member) => (
                 <PersonInfo
-                  key={member.id}
+                  key={member.memberId}
                   name={member.name}
-                  profileImg={member.profileImg}
-                  tags={member.tags}
+                  profileImg={member.profileImg || ""} // 프로필 이미지가 null이거나 없을 때 방어 코드
+                  tags={member.collaborationTags}
                   onCardClick={() =>
-                    console.log(`${member.name} 팀원의 상세 프로필 보기`)
+                    console.log(
+                      `memberId ${member.memberId}: ${member.name} 팀원의 상세 프로필 보기 요청`
+                    )
                   }
                 />
               ))
@@ -225,7 +273,6 @@ function MyTeam() {
         )}
       </ListContainer>
 
-      {/* 💡 필터 모달 바텀시트 연결 */}
       <TagFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}

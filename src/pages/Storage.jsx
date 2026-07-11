@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import PurpleHeader from "../components/PurpleHeader";
+import { useNavigate } from "react-router-dom";
 import PostInfo from "../components/PostInfo";
 import PersonInfo from "../components/PersonInfo";
 import TagFilter from "../components/TagFilter";
-import { useNavigate } from "react-router-dom";
-import api from "../api/axios"; // 💡 작성해주신 axios 인스턴스 import
+import instance from "../api/axios"; // 📌 실제 연동할 공통 Axios 인스턴스
 
 const PageContainer = styled.div`
   width: 100%;
@@ -14,6 +14,63 @@ const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+`;
+
+const MainTabRow = styled.div`
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+const MainTabButton = styled.button`
+  flex: 1;
+  height: 48px;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: ${(props) => (props.$active ? "700" : "500")};
+  color: ${(props) => (props.$active ? "#7063e3" : "#6b7280")};
+  position: relative;
+  cursor: pointer;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: ${(props) => (props.$active ? "#7063e3" : "transparent")};
+  }
+`;
+
+const SubTabRow = styled.div`
+  display: flex;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f3f4f6;
+`;
+
+const SubTabButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: ${(props) => (props.$active ? "700" : "500")};
+  color: ${(props) => (props.$active ? "#7063e3" : "#9ca3af")};
+  padding: 2px 0;
+  cursor: pointer;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: ${(props) => (props.$active ? "#7063e3" : "transparent")};
+    border-radius: 2px;
+  }
 `;
 
 const ListContainer = styled.div`
@@ -92,87 +149,119 @@ const EmptyMessage = styled.div`
   font-size: 0.9rem;
   margin-top: 60px;
   line-height: 1.5;
+  white-space: pre-wrap;
 `;
 
-function MyTeam() {
+function Storage() {
   const navigate = useNavigate();
 
-  // 상태 관리
-  const [myTeamPosts, setMyTeamPosts] = useState([]); // 내 팀 목록 상태
-  const [members, setMembers] = useState([]); // 선택된 팀의 팀원 목록 상태
-  const [selectedTeamId, setSelectedTeamId] = useState(null);
+  // 📌 탭 및 필터 관리 상태
+  const [mainTab, setMainTab] = useState("applied"); // 'applied' | 'posted'
+  const [subTab, setSubTab] = useState("all"); // 'all' | 'recruiting' | 'closed'
 
+  // 📌 서버 데이터 저장 상태
+  const [posts, setPosts] = useState([]); // 보관함 목록 리스트 데이터
+  const [applicants, setApplicants] = useState([]); // 특정 글의 지원자 목록 데이터
+  const [selectedPost, setSelectedPost] = useState(null); // 선택된 내가 올린 모집글 객체 정보
+  const [loading, setLoading] = useState(false);
+
+  // 📌 키워드 필터링 상태
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
 
-  // =========================================================
-  // 📡 [API 1] 내가 속한 팀 목록 조회 (컴포넌트 마운트 시 최초 1회 실행)
-  // =========================================================
-  useEffect(() => {
-    const fetchMyTeams = async () => {
+  // 1️⃣ API 호출: 보관함 목록 조회 (/api/storage)
+  const fetchStorageData = useCallback(
+    async (type, status) => {
+      setLoading(true);
       try {
-        const response = await api.get("/api/teams/me");
-        if (response.data.isSuccess) {
-          setMyTeamPosts(response.data.result); // 명세서 규격의 배열 데이터 주입
+        // 명세서 규격: /api/storage?type={applied|posted}&status={all|recruiting|closed}
+        const response = await instance.get(
+          `/api/storage?type=${type}&status=${status}`
+        );
+        if (response.data && response.data.isSuccess) {
+          setPosts(response.data.result || []);
         }
       } catch (error) {
-        console.error("My팀 목록을 불러오는데 실패했습니다.", error);
+        console.error("보관함 목록 로드 실패:", error);
         if (error.response?.status === 401) {
-          alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+          alert("로그인이 만료되었습니다.");
           navigate("/login");
         }
+      } finally {
+        setLoading(false);
       }
-    };
-
-    fetchMyTeams();
-  }, [navigate]);
-
-  // =========================================================
-  // 📡 [API 2] 특정 팀 선택 시 해당 팀원 목록 조회
-  // =========================================================
-  useEffect(() => {
-    if (selectedTeamId === null) {
-      setMembers([]);
-      return;
-    }
-
-    const fetchTeamMembers = async () => {
-      try {
-        const response = await api.get(`/api/teams/${selectedTeamId}/members`);
-        if (response.data.isSuccess) {
-          setMembers(response.data.result);
-        }
-      } catch (error) {
-        console.error("팀원 목록을 불러오는데 실패했습니다.", error);
-
-        // 💡 17번 팀원 목록 조회 전용 에러 코드로 완벽 수정!
-        if (error.response?.status === 401) {
-          alert("인증이 필요합니다.");
-        } else if (error.response?.status === 403) {
-          alert("해당 팀 소속이 아닙니다."); // TEAM_403 대응
-          setSelectedTeamId(null);
-        } else if (error.response?.status === 404) {
-          alert("존재하지 않는 팀입니다."); // TEAM_404 대응
-          setSelectedTeamId(null);
-        }
-      }
-    };
-
-    fetchTeamMembers();
-  }, [selectedTeamId]);
-
-  // 💡 선택된 팀의 상단 고정 노출용 데이터 추출
-  const currentSelectedTeam = myTeamPosts.find(
-    (team) => team.teamId === selectedTeamId
+    },
+    [navigate]
   );
 
-  // 💡 명세서의 `collaborationTags` 필드명을 활용한 실시간 클라이언트 사이드 필터링
-  const filteredMembers = members.filter((member) => {
+  // 2️⃣ API 호출: 지원자 목록 조회 (/api/posts/{postId}/applicants)
+  const fetchApplicantsData = useCallback(
+    async (postId) => {
+      setLoading(true);
+      try {
+        const response = await instance.get(`/api/posts/${postId}/applicants`);
+        if (response.data && response.data.isSuccess) {
+          setApplicants(response.data.result || []);
+        }
+      } catch (error) {
+        console.error("지원자 목록 로드 실패:", error);
+
+        if (error.response) {
+          const status = error.response.status;
+          const serverMessage =
+            error.response.data?.message || "오류가 발생했습니다.";
+
+          // 💡 1. 인증 실패 (COMMON_401)
+          if (status === 401) {
+            alert(serverMessage); // "인증이 필요합니다."
+            localStorage.removeItem("token");
+            navigate("/login");
+            return;
+          }
+
+          // 💡 2. 권한 없음 (POST_403) - 다른 사람의 모집글 지원자 목록을 보려고 했을 때
+          if (status === 403) {
+            alert(serverMessage); // "본인이 작성한 모집글이 아닙니다."
+            setSelectedPost(null); // 목록 화면으로 강제 복귀
+            setApplicants([]);
+            return;
+          }
+
+          // 💡 3. 존재하지 않는 글 (POST_404) - 잘못된 postId로 요청했을 때
+          if (status === 404) {
+            alert(serverMessage); // "존재하지 않는 모집글입니다."
+            setSelectedPost(null); // 목록 화면으로 강제 복귀
+            setApplicants([]);
+            return;
+          }
+        }
+
+        // 그 외 일반적인 네트워크 에러 처리
+        alert("지원자 목록을 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate]
+  );
+
+  // 메인탭이나 서브탭 변경될 때마다 자동 연동 호출
+  useEffect(() => {
+    if (selectedPost === null) {
+      fetchStorageData(mainTab, subTab);
+    }
+  }, [mainTab, subTab, selectedPost, fetchStorageData]);
+
+  // 3️⃣ 프론트엔드 자체 필터링: 협업 성향 키워드로 지원자 목록 걸러내기 (명세서 가이드라인 반영)
+  const filteredApplicants = applicants.filter((user) => {
     if (activeFilters.length === 0) return true;
-    return member.collaborationTags.some((tag) => activeFilters.includes(tag));
+    // 백엔드 키 명세에 맞춘 'collaborationTags' 배열 검사
+    return user.collaborationTags?.some((tag) =>
+      activeFilters.includes(tag.replace("#", ""))
+    );
   });
 
-  // 태그 핸들러들
+  // 태그 핸들러
   const handleRemoveTag = (tagToRemove) => {
     setActiveFilters(activeFilters.filter((tag) => tag !== tagToRemove));
   };
@@ -184,95 +273,172 @@ function MyTeam() {
 
   return (
     <PageContainer>
-      <PurpleHeader title="My팀" root="/main" />
+      <PurpleHeader title="보관함" root="/main" />
 
-      <ListContainer>
-        {selectedTeamId === null ? (
-          /* =========================================================
-             [기본 상태] 내가 속한 팀 목록 주르륵 노출
-             ========================================================= */
-          myTeamPosts && myTeamPosts.length > 0 ? (
-            myTeamPosts.map((team) => (
-              <PostInfo
-                key={team.teamId}
-                isClosed={team.postStatus === "모집마감"}
-                title={team.title}
-                name={team.writerName}
-                date={team.createdAt}
-                onClick={() => setSelectedTeamId(team.teamId)}
-              />
-            ))
-          ) : (
-            <EmptyMessage>
-              현재 소속되거나 모집 중인 팀이 없습니다.
-            </EmptyMessage>
-          )
-        ) : (
-          /* =========================================================
-             [상세 상태] 클릭한 팀 정보 고정 + 키워드 필터 + 팀원 목록
-             ========================================================= */
-          <>
-            {/* 상단 클릭된 팀 카드 고정 */}
-            {currentSelectedTeam && (
-              <PostInfo
-                isClosed={currentSelectedTeam.postStatus === "모집마감"}
-                title={currentSelectedTeam.title}
-                name={currentSelectedTeam.writerName}
-                date={currentSelectedTeam.createdAt}
-                onClick={() => {
-                  setSelectedTeamId(null);
-                  setActiveFilters([]); // 리스트로 돌아갈 때 필터 초기화
-                }}
-              />
-            )}
+      {/* 메인 탭 */}
+      <MainTabRow>
+        <MainTabButton
+          $active={mainTab === "applied"}
+          onClick={() => {
+            setMainTab("applied");
+            setSubTab("all"); // 서브탭 초기화
+            setSelectedPost(null);
+            setActiveFilters([]);
+          }}
+        >
+          내가 지원한 모집글
+        </MainTabButton>
+        <MainTabButton
+          $active={mainTab === "posted"}
+          onClick={() => {
+            setMainTab("posted");
+            setSubTab("all"); // 명세서 기준 posted도 전체/모집중/마감 조회 가능하므로 공유 가능
+            setSelectedPost(null);
+            setActiveFilters([]);
+          }}
+        >
+          내가 올린 모집글
+        </MainTabButton>
+      </MainTabRow>
 
-            {/* 키워드 성향 필터 영역 */}
-            <FilterSection>
-              <FilterTitle>
-                <span role="img" aria-label="tag">
-                  <img
-                    src="./tag.svg"
-                    alt="tag"
-                    style={{ transform: "translateY(3px)" }}
-                  />
-                </span>{" "}
-                키워드 성향 필터
-              </FilterTitle>
-              <TagRow>
-                {activeFilters.map((tag) => (
-                  <ActiveTagChip key={tag}>
-                    #{tag}
-                    <button onClick={() => handleRemoveTag(tag)}>✕</button>
-                  </ActiveTagChip>
-                ))}
-                <AddTagButton onClick={() => setIsFilterOpen(true)}>
-                  추가하기 +
-                </AddTagButton>
-              </TagRow>
-            </FilterSection>
-
-            {/* 필터링된 팀원 리스트 출력 */}
-            {filteredMembers.length > 0 ? (
-              filteredMembers.map((member) => (
-                <PersonInfo
-                  key={member.memberId}
-                  name={member.name}
-                  profileImg={member.profileImg || ""} // 프로필 이미지가 null이거나 없을 때 방어 코드
-                  tags={member.collaborationTags}
-                  onCardClick={() =>
-                    console.log(
-                      `memberId ${member.memberId}: ${member.name} 팀원의 상세 프로필 보기 요청`
-                    )
-                  }
+      {/* 1. 내가 지원한 모집글 탭 활성화 시 */}
+      {mainTab === "applied" && (
+        <>
+          <SubTabRow>
+            <SubTabButton
+              $active={subTab === "all"}
+              onClick={() => setSubTab("all")}
+            >
+              전체
+            </SubTabButton>
+            <SubTabButton
+              $active={subTab === "recruiting"}
+              onClick={() => setSubTab("recruiting")}
+            >
+              모집중
+            </SubTabButton>
+            <SubTabButton
+              $active={subTab === "closed"}
+              onClick={() => setSubTab("closed")}
+            >
+              마감
+            </SubTabButton>
+          </SubTabRow>
+          <ListContainer>
+            {loading ? (
+              <EmptyMessage>로딩 중...</EmptyMessage>
+            ) : posts.length > 0 ? (
+              posts.map((post) => (
+                <PostInfo
+                  key={post.postId}
+                  isClosed={post.status === "모집마감"}
+                  title={post.title}
+                  name={post.writerName}
+                  date={post.createdAt}
+                  /* 📌 명세서 확정 사항: 지원한 글은 클릭 시 모집글 상세 조회 API 7로 이동 */
+                  onClick={() => navigate(`/post/${post.postId}`)}
                 />
               ))
             ) : (
-              <EmptyMessage>조건에 맞는 팀원이 없습니다.</EmptyMessage>
+              <EmptyMessage>
+                {
+                  "아직 신청한 모집글이 없습니다.\n마음에 드는 프로젝트에 지원해 보세요!"
+                }
+              </EmptyMessage>
             )}
-          </>
-        )}
-      </ListContainer>
+          </ListContainer>
+        </>
+      )}
 
+      {/* 2. 내가 올린 모집글 탭 활성화 시 */}
+      {mainTab === "posted" && (
+        <ListContainer>
+          {loading && <EmptyMessage>로딩 중...</EmptyMessage>}
+
+          {!loading && selectedPost === null ? (
+            posts.length > 0 ? (
+              posts.map((post) => (
+                <PostInfo
+                  key={post.postId}
+                  isClosed={post.status === "모집마감"}
+                  title={post.title}
+                  name={post.writerName}
+                  date={post.createdAt}
+                  /* 📌 명세서 확정 사항: 내가 올린 글 클릭 시 해당 글의 지원자 목록을 보는 상세 상태로 전환 */
+                  onClick={() => {
+                    setSelectedPost(post);
+                    fetchApplicantsData(post.postId);
+                  }}
+                />
+              ))
+            ) : (
+              <EmptyMessage>아직 직접 등록한 모집글이 없습니다.</EmptyMessage>
+            )
+          ) : (
+            // 지원자 목록 조회 화면 (팀장 뷰)
+            !loading &&
+            selectedPost && (
+              <>
+                {/* 상단에 선택된 게시글 고정 */}
+                <PostInfo
+                  isClosed={selectedPost.status === "모집마감"}
+                  title={selectedPost.title}
+                  name={selectedPost.writerName}
+                  date={selectedPost.createdAt}
+                  onClick={() => {
+                    setSelectedPost(null);
+                    setApplicants([]);
+                    setActiveFilters([]); // 목록으로 돌아갈 때 초기화
+                  }}
+                />
+
+                {/* 💡 프론트 전용 키워드 성향 필터 영역 */}
+                <FilterSection>
+                  <FilterTitle>
+                    <span role="img" aria-label="tag">
+                      <img
+                        src="./tag.svg"
+                        alt="tag"
+                        style={{ transform: "translateY(3px)" }}
+                      />
+                    </span>{" "}
+                    키워드 성향 필터
+                  </FilterTitle>
+                  <TagRow>
+                    {activeFilters.map((tag) => (
+                      <ActiveTagChip key={tag}>
+                        #{tag}
+                        <button onClick={() => handleRemoveTag(tag)}>✕</button>
+                      </ActiveTagChip>
+                    ))}
+                    <AddTagButton onClick={() => setIsFilterOpen(true)}>
+                      추가하기 +
+                    </AddTagButton>
+                  </TagRow>
+                </FilterSection>
+
+                {/* 📌 지원자 프로필 리스트 출력 파트 */}
+                {filteredApplicants.length > 0 ? (
+                  filteredApplicants.map((user) => (
+                    /* 💡 팀원분이 가공해둔 백엔드 바디 연동용 PersonInfo 컴포넌트 호출 */
+                    <PersonInfo
+                      key={user.applicationId}
+                      {...user} // 백엔드 response인 name, school, major, grade, collaborationTags 등을 알아서 props로 수신하게 구조 매핑
+                      onCardClick={() =>
+                        console.log(`${user.name}의 상세 정보 조회`)
+                      }
+                    />
+                  ))
+                ) : (
+                  <EmptyMessage>조건에 맞는 지원자가 없습니다.</EmptyMessage>
+                )}
+              </>
+            )
+          )}
+        </ListContainer>
+      )}
+
+      {/* 필터 모달 컴포넌트 */}
       <TagFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
@@ -283,4 +449,4 @@ function MyTeam() {
   );
 }
 
-export default MyTeam;
+export default Storage;
