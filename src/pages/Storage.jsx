@@ -256,8 +256,14 @@ function Storage() {
   const filteredApplicants = applicants.filter((user) => {
     if (activeFilters.length === 0) return true;
     // 백엔드 키 명세에 맞춘 'collaborationTags' 배열 검사
-    return user.collaborationTags?.some((tag) =>
-      activeFilters.includes(tag.replace("#", ""))
+    // // [수정 전]
+    // return user.collaborationTags?.some((tag) =>
+    //   activeFilters.includes(tag.replace("#", ""))
+    // );
+
+    // [수정 후 - 명세서의 데이터 구조에 맞춘 비교]
+    return user.collaborationTags?.some(
+      (tag) => activeFilters.includes(tag) // 그대로 비교
     );
   });
 

@@ -187,7 +187,23 @@ function CertificationWait() {
         }
       } catch (error) {
         console.error("인증 상태 조회 실패:", error);
-        // 토큰 만료(401) 등 특정 에러 분기가 필요하면 처리 가능
+
+        if (error.response) {
+          const { status: httpStatus, data } = error.response;
+          const serverMessage = data?.message; // 서버에서 내려오는 에러 메시지 추출
+
+          // 1. 401 에러 처리 (토큰 없음/만료)
+          if (httpStatus === 401) {
+            alert(serverMessage || "인증이 필요합니다. 다시 로그인해 주세요.");
+            localStorage.removeItem("token");
+            navigate("/login");
+          }
+          // 2. 404 에러 처리 (인증 미신청 상태)
+          else if (httpStatus === 404) {
+            alert(serverMessage || "제출된 인증 서류가 없습니다.");
+            navigate("/certification"); // 인증 신청 페이지로 튕겨내기
+          }
+        }
       }
     };
 
@@ -197,7 +213,7 @@ function CertificationWait() {
 
     // 사용자가 페이지를 벗어나면 타이머를 청소(Clean-up)하여 메모리 누수 방지
     return () => clearInterval(intervalId);
-  }, []);
+  }, [navigate]);
 
   const handleRetry = () => {
     navigate("/certification");

@@ -291,7 +291,7 @@ function MainHome() {
               placeholder="팀, 분야, 키워드로 검색해보세요."
             />
             <span>
-              <img src="/img/Mainimg/검색아이콘.svg" alt="검색이미지" />
+              <img src="/img/MainImg/search.svg" alt="검색이미지" />
             </span>
           </SearchBarContainer>
         </TopBanner>
