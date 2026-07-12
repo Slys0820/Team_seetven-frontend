@@ -15,6 +15,12 @@ const PageWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
+  /* 배경 이미지 추가 */
+  background-image: url("./background.svg");
+  background-size: cover; /* 화면을 꽉 채우게 */
+  background-position: center; /* 이미지 중앙 정렬 */
+  background-repeat: no-repeat; /* 반복 방지 */
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -372,7 +378,7 @@ function SignUp() {
 
   return (
     <PageWrapper>
-      <InvisibleHeader title="회원가입" />
+      <InvisibleHeader title="회원가입" root="/" />
       <ContainerBox>
         <Form onSubmit={handleSubmit}>
           <Box>
