@@ -5,6 +5,7 @@ import InvisibleHeader from "../components/InvisibleHeader";
 // 💡 로그인 때 만들어둔 axios 인스턴스를 사용합니다.
 import instance from "../api/axios";
 
+console.log("내 환경변수 값은?:", process.env.REACT_APP_API_URL);
 // [스타일 컴포넌트 유지를 위해 기존 스타일 정의 생략 - 원본 그대로 적용됩니다]
 const PageWrapper = styled.div`
   background-color: #f9f7fc;
@@ -323,11 +324,25 @@ function SignUp() {
         password,
         passwordCheck,
       });
-
+      console.log("백엔드가 던져준 진짜 데이터 원본:", response.data);
       // 3️⃣ 성공 분기 처리
       if (response.data && response.data.isSuccess) {
+        // 🚀 백엔드가 확답해 준 'accessToken' 이름으로 토큰을 정확히 꺼냅니다!
+        // 🚀 [수정] 백엔드 응답 구조에 맞게 .result 를 중간에 꼭 넣어줍니다!
+        const token = response.data.result.accessToken;
+        if (token) {
+          // 브라우저 로컬 스토리지에 토큰을 심어 "로그인 상태"를 만들어줍니다.
+          localStorage.setItem("token", token);
+        } else {
+          console.warn(
+            "회원가입은 성공했으나 응답에서 토큰을 찾을 수 없습니다. 명세서를 확인해 보세요!"
+          );
+        }
         alert(response.data.message || "회원가입이 완료되었습니다! 🎉");
-        navigate("/certification");
+        // ⏱️ 딱 100ms(0.1초) 뒤에 이동하도록 딜레이를 줍니다.
+        setTimeout(() => {
+          navigate("/certification");
+        }, 100);
       } else {
         setErrorMessage("회원가입 처리 중 알 수 없는 오류가 발생했습니다.");
       }
