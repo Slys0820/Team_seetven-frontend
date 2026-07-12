@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import PurpleHeader from "../components/PurpleHeader";
+import PurpleHeaderNoBack from "../components/PurpleHeaderNoBack";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -201,7 +201,7 @@ function ReWrite() {
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
   // 💡 [추가] 현재 화면이 수정 모드(2번)인지 조회 모드(1번)인지 저장하는 상태 (기본값: false = 조회 상태)
-  const [isEdit, setIsEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(true);
   // 1️⃣ [GET]은 켜지자마자 실행되어야 하므로 useEffect 안에 넣음
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -241,9 +241,10 @@ function ReWrite() {
       await axios.patch("/api/profile", updatedData);
       alert("수정이 완료되었습니다!");
       // 💡 [정답!] 서버 저장에 성공했으므로, 수정 모드를 풀고 다시 '조회 모드'로 화면을 돌려놓습니다.
-      setIsEdit(false);
+      navigate("/main");
     } catch (error) {
       alert(error.response?.data?.message || "수정에 실패했습니다.");
+      navigate("/main");
     }
   };
 
@@ -296,7 +297,7 @@ function ReWrite() {
   const navigate = useNavigate();
   return (
     <div style={{ height: "100%" }}>
-      <PurpleHeader title="프로필 수정" root="/main" />
+      <PurpleHeaderNoBack title="프로필 수정" root="/main" />
       <Array>
         {/* ================= 1. 기본정보 영역 ================= */}
         <InfoText>

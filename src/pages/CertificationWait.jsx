@@ -173,7 +173,7 @@ function CertificationWait() {
         const response = await instance.get(
           "/api/auth/school-verification/status"
         );
-
+        console.log("백엔드가 준 실시간 상태 데이터:", response.data);
         if (response.data && response.data.isSuccess) {
           const serverStatus = response.data.result.verificationStatus;
 

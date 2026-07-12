@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
+import axios from "axios";
+import ProfileCard from "../components/ProfileCard";
 
 // --- [스타일 컴포넌트 구역] ---
 const HomeContainer = styled.div`
@@ -221,10 +223,32 @@ const PostSummary = styled.div`
   line-height: 1.4;
 `;
 
+const CardOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+`;
+
+const CardWrapperInner = styled.div`
+  width: 100%;
+  max-width: 360px;
+`;
+
 // --- [컴포넌트 메인 함수] ---
 function MainHome() {
   const navigate = useNavigate();
-
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
   // 💡 수정한 카테고리 고유 변수명 유지
   const categories_icon = [
     { id: 1, name: "기획", imgSrc: "plan.svg" },
@@ -240,6 +264,15 @@ function MainHome() {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
+    const getProfileData = async () => {
+      try {
+        const response = await axios.get(" /api/profile/me");
+        setProfileData(response.data);
+      } catch (error) {
+        console.error("기존 프로필을 불러오지 못했습니다.", error);
+      }
+    };
+
     const fetchPosts = async () => {
       try {
         // 1. /api/home 주소로 메인 데이터 요청
@@ -283,7 +316,7 @@ function MainHome() {
         <TopBanner>
           <HeaderRow>
             <LogoText>STEPS</LogoText>
-            <MyPageIconMock onClick={() => navigate("/rewrite")} />
+            <MyPageIconMock onClick={() => setIsProfileOpen(true)} />
           </HeaderRow>
           <SearchBarContainer>
             <SearchInput
@@ -358,6 +391,19 @@ function MainHome() {
           </PostCardMock>
         ))}
       </ScrollableCardsArea>
+
+      {isProfileOpen && (
+        <CardOverlay onClick={() => setIsProfileOpen(false)}>
+          <CardWrapperInner onClick={(e) => e.stopPropagation()}>
+            <ProfileCard
+              name="수정하기"
+              xClick={() => setIsProfileOpen(false)}
+              onClick={() => navigate("/rewrite")}
+              profileData={profileData}
+            />
+          </CardWrapperInner>
+        </CardOverlay>
+      )}
     </HomeContainer>
   );
 }
