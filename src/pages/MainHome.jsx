@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
-import axios from "axios";
+
 import ProfileCard from "../components/ProfileCard";
 
 // --- [스타일 컴포넌트 구역] ---
@@ -262,17 +262,17 @@ function MainHome() {
   ];
 
   const [posts, setPosts] = useState([]);
+  const getProfileData = async () => {
+    try {
+      const response = await instance.get("/api/profile/me");
+      console.log("백엔드가 던져준 진짜 데이터 원본:", response.data);
+      setProfileData(response.data);
+    } catch (error) {
+      console.error("기존 프로필을 불러오지 못했습니다.", error);
+    }
+  };
 
   useEffect(() => {
-    const getProfileData = async () => {
-      try {
-        const response = await axios.get(" /api/profile/me");
-        setProfileData(response.data);
-      } catch (error) {
-        console.error("기존 프로필을 불러오지 못했습니다.", error);
-      }
-    };
-
     const fetchPosts = async () => {
       try {
         // 1. /api/home 주소로 메인 데이터 요청
@@ -316,7 +316,12 @@ function MainHome() {
         <TopBanner>
           <HeaderRow>
             <LogoText>STEPS</LogoText>
-            <MyPageIconMock onClick={() => setIsProfileOpen(true)} />
+            <MyPageIconMock
+              onClick={() => {
+                getProfileData();
+                setIsProfileOpen(true);
+              }}
+            />
           </HeaderRow>
           <SearchBarContainer>
             <SearchInput

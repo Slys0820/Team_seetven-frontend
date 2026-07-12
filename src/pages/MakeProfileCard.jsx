@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useNavigate, useEffect } from "react-router-dom";
 import PurpleHeaderNoBack from "../components/PurpleHeaderNoBack";
 import { useState } from "react";
-import axios from "axios";
+import instance from "../api/axios";
 
 const InputBox = styled.input`
   width: 100%;
@@ -249,7 +249,7 @@ function MakeProfileCard() {
       };
 
       // 서버에 POST 요청 보내기
-      const response = await axios.post("/api/profile", ProfileinInfo);
+      const response = await instance.post("/api/profile", ProfileinInfo);
 
       // 서버 응답이 잘 도착하면 아래 코드가 실행됨
       // axios는 친절하게 알맹이를 '.data' 안에 넣어줌

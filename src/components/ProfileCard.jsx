@@ -289,7 +289,7 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
         <SwiperSlide>
           <div className="card-container" style={cardStyle}>
             <CardLine />
-            <XButton src="x (2).png" alt="x버튼" onClick={xClick} />
+            <XButton src="xx.png" alt="x버튼" onClick={xClick} />
 
             {/* 원형 프로필, 이름, 학과, 태그 등 구현 */}
             <img
@@ -360,7 +360,7 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
             {/* 자격증 및 수상이력, 자기소개 내용 구현 */}
             <CardLine />
             <Array>
-              <XButton src="x (2).png" alt="x버튼" onClick={xClick} />
+              <XButton src="xx.png" alt="x버튼" onClick={xClick} />
 
               <div
                 style={{
@@ -387,7 +387,7 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
                 }}
               >
                 <Line />
-                <StarIcon src="Star 1.svg" alt="star" />
+                <StarIcon src="Stars.svg" alt="star" />
                 <Line />
               </div>
               <div
