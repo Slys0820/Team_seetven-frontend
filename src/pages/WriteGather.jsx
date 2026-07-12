@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import PurpleHeader from "../components/PurpleHeader";
 import DropDown from "../components/DropDown";
+import DropDown2 from "../components/DropDown2";
+import axios from "axios";
 
 // ───────── 공통 스타일 ─────────
 
@@ -12,8 +14,8 @@ const PageWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 100dvh;
-  padding-bottom: 40px;
+  height: 100%;
+
   box-sizing: border-box;
 `;
 
@@ -30,8 +32,8 @@ const BCard = styled.div`
   width: 100%;
   max-width: 420px;
   border: none;
-  border-radius: 14px;
-  padding: 18px 20px;
+  border-radius: 6px;
+  padding: 7px 7px;
   margin-top: 16px;
   box-sizing: border-box;
   box-shadow: 0px 0px 2px 0px #7063e3;
@@ -88,16 +90,17 @@ const InfoRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   margin-bottom: 5px;
 `;
 
 // 핑크 원형 아이콘
 const InfoDot = styled.div`
-  width: 10px;
-  height: 10px;
+  width: 20px;
+  height: 20px;
+
   border-radius: 100%;
-  background-color: #f9a8d4;
+  background-color: #f2f1fb;
   flex-shrink: 0;
 `;
 
@@ -123,11 +126,12 @@ const InfoValue = styled.div`
 // 한줄 입력창
 const InputBox = styled.input`
   width: 100%;
-  height: 2.5rem;
+  height: 2rem;
 
   border-radius: 6px;
   outline: none;
-  padding: 0 10px;
+  padding-right: 40px;
+  padding-left: 10px;
   box-sizing: border-box;
   border: 1px solid #b8b0e5;
   font-size: 0.82rem;
@@ -146,11 +150,11 @@ const InputBox = styled.input`
 // 한줄 입력창
 const InputBox2 = styled.input`
   width: 100%;
-  height: 3.2rem;
+  height: 2rem;
 
   border-radius: 6px;
   outline: none;
-  padding: 0 10px;
+  padding-left: 7px;
   box-sizing: border-box;
   border: 1px solid #e8e8e8;
   font-size: 0.82rem;
@@ -169,7 +173,7 @@ const InputBox2 = styled.input`
 // 여러줄 입력창 (내용)
 const TextArea = styled.textarea`
   width: 100%;
-  min-height: 120px;
+  min-height: 160px;
   border: none;
   box-shadow: 0px 0px 2px 0px rgba(112, 99, 227, 1);
   border-radius: 10px;
@@ -204,7 +208,7 @@ const SubmitButton = styled.button`
   font-size: 1rem;
   font-weight: bold;
   cursor: not-allowed;
-  margin-top: 20px;
+  margin-top: 1px;
   flex-shrink: 0;
 
   &.ready {
@@ -217,8 +221,10 @@ const SubmitButton = styled.button`
 // 오류 문구 (빨간색)
 const ErrorText = styled.p`
   color: #ef4444;
-  font-size: 0.82rem;
-  margin-top: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 10%;
+  margin-bottom: 3px;
   width: 90%;
   max-width: 420px;
   text-align: center;
@@ -233,6 +239,11 @@ function WriteGather() {
   const [activityType, setActivityType] = useState(""); // 활동방식
   const [purpose, setPurpose] = useState(""); // 활동목적
   const [content, setContent] = useState(""); // 내용
+  const [titlet, setTitle] = useState("");
+
+  // 💡 [핵심 추가] 현재 어떤 드롭다운이 열려있는지 ID나 이름을 저장할 State
+  // 아무것도 안 열려있으면 null 또는 ""
+  const [activeDropdown, setActiveDropdown] = useState("");
 
   // 날짜 형식 검사 (YYYY/MM/DD)
   const dateRegex = /^\d{4}\/\d{2}\/\d{2}$/;
@@ -248,17 +259,70 @@ function WriteGather() {
     purpose &&
     content;
 
+  const dataSend = async () => {
+    try {
+      const requestBody = {
+        title: titlet, // ⚠️ 임시 제목 (제목 State가 있다면 매핑)
+        applicationUrl: postUrl, // useState("") 값 연동
+        category: field, // useState("") 값 연동
+        recruitDeadline: deadline, // useState("") 값 연동
+        recruitCount: Number(headcount), // 💡 숫자로 변환해서 전달 (명세서 규격 맞춤)
+        activityType: activityType || "미정", // 값이 없으면 기본값 세팅
+        activityPurpose: purpose || "미정", // 값이 없으면 기본값 세팅
+        content: content, // useState("") 값 연동
+      };
+
+      const response = await axios.post("/api/posts", requestBody);
+      if (response.data && response.data.isSuccess) {
+        alert("공고가 성공적으로 등록되었습니다! 🎉");
+        navigate("/writeend"); // 부모 컴포넌트에 정의된 navigate 실행
+      } else {
+        alert(response.data?.message || "등록에 실패했습니다.");
+      }
+    } catch (error) {
+      if (error.response) {
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+
+        if (status === 400) {
+          alert("입력하신 데이터 형식이 맞지 않습니다. (날짜나 인원수 확인)");
+        } else if (status === 403) {
+          alert(serverMessage || "접근 권한이 없습니다.");
+        } else {
+          alert(`서버 에러가 발생했습니다. (오류 코드: ${status})`);
+        }
+      } else {
+        alert("네트워크 연결을 확인해 주세요.");
+      }
+    }
+  };
+
   return (
     <PageWrapper>
       <PurpleHeader title="모집 글 작성" root="/wholepost" />
       {/* 제목 카드 */}
-      <Card>
+      <Card style={{ marginTop: "5%", position: "relative" }}>
         <Title name="제목" />
         <InputBox
           placeholder="제목을 입력해 주세요."
-          value={postUrl}
-          onChange={(e) => setPostUrl(e.target.value)}
+          value={titlet}
+          maxLength={30}
+          onChange={(e) => setTitle(e.target.value)}
         />
+
+        {/* 글자수 카운터 */}
+        <span
+          style={{
+            position: "absolute",
+
+            bottom: "13px",
+            right: "20px",
+            fontSize: "0.75rem",
+            color: "#9ca3af",
+          }}
+        >
+          {titlet.length}/30
+        </span>
       </Card>
 
       {/* 모집 정보 카드 */}
@@ -271,10 +335,19 @@ function WriteGather() {
             <InfoDot />
             <InfoLabel>지원 공고</InfoLabel>
             <InfoValue>
-              <InputBox2
-                placeholder="지원 공고 링크를 입력해 주세요."
-                style={{ height: "1.8rem" }}
-              />
+              <div style={{ position: "relative" }}>
+                <InputBox2
+                  style={{ paddingRight: "30px" }}
+                  placeholder="지원하는 공고 링크를 올려주세요."
+                  value={postUrl}
+                  onChange={(e) => setPostUrl(e.target.value)}
+                />
+                <img
+                  style={{ position: "absolute", bottom: "8px", right: "10px" }}
+                  src="link2.png"
+                  alt="링크"
+                />
+              </div>
             </InfoValue>
           </InfoRow>
           <Line />
@@ -284,9 +357,26 @@ function WriteGather() {
             <InfoLabel>모집 분야</InfoLabel>
             <InfoValue>
               <DropDown
-                optionss={["기획", "디자인", "프론트엔드", "백엔드"]}
+                optionss={[
+                  "기획",
+                  "광고/마케팅",
+                  "과학/공학",
+                  "네이밍/슬로건",
+                  "경제/금융",
+                  "영상/콘텐츠",
+                  "문학/시니리오",
+                  "기타",
+                ]}
                 value={field}
                 onChange={(value) => setField(value)}
+
+                // 💡 현재 열려있는 드롭다운이 'field'인지 판별해서 알려줌 (true/false)
+                isOpen={activeDropdown === "field"}
+                // 💡 토글 함수: 내가 켜지면 부모에게 'field'라고 알리고, 이미 켜져있었으면 닫음("")
+                onToggle={(e) => {
+                  if (e) e.stopPropagation(); // 이벤트 버블링 차단 🛡️
+                  setActiveDropdown(activeDropdown === "field" ? "" : "field");
+                }}
               />
             </InfoValue>
           </InfoRow>
@@ -300,7 +390,8 @@ function WriteGather() {
                 placeholder="YYYY/MM/DD"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                style={{ height: "1.8rem" }}
+
+                style={{ color: "black" }}
               />
             </InfoValue>
           </InfoRow>
@@ -310,10 +401,20 @@ function WriteGather() {
             <InfoDot />
             <InfoLabel>모집 인원</InfoLabel>
             <InfoValue>
-              <DropDown
+              <DropDown2
                 optionss={["1명", "2명", "3명", "4명", "5명"]}
                 value={headcount}
                 onChange={(value) => setHeadcount(value)}
+
+                // 💡 현재 열려있는 드롭다운이 'field'인지 판별해서 알려줌 (true/false)
+                isOpen={activeDropdown === "headcount"}
+                // 💡 토글 함수: 내가 켜지면 부모에게 'field'라고 알리고, 이미 켜져있었으면 닫음("")
+                onToggle={(e) => {
+                  if (e) e.stopPropagation(); // 이벤트 버블링 차단 🛡️
+                  setActiveDropdown(
+                    activeDropdown === "headcount" ? "" : "headcount"
+                  );
+                }}
               />
             </InfoValue>
           </InfoRow>
@@ -323,10 +424,20 @@ function WriteGather() {
             <InfoDot />
             <InfoLabel>활동 방식</InfoLabel>
             <InfoValue>
-              <DropDown
+              <DropDown2
                 optionss={["온라인", "오프라인", "혼합"]}
                 value={activityType}
                 onChange={(value) => setActivityType(value)}
+
+                // 💡 현재 열려있는 드롭다운이 'field'인지 판별해서 알려줌 (true/false)
+                isOpen={activeDropdown === "activityType"}
+                // 💡 토글 함수: 내가 켜지면 부모에게 'field'라고 알리고, 이미 켜져있었으면 닫음("")
+                onToggle={(e) => {
+                  if (e) e.stopPropagation(); // 이벤트 버블링 차단 🛡️
+                  setActiveDropdown(
+                    activeDropdown === "activityType" ? "" : "activityType"
+                  );
+                }}
               />
             </InfoValue>
           </InfoRow>
@@ -336,10 +447,19 @@ function WriteGather() {
             <InfoDot />
             <InfoLabel>활동 목적</InfoLabel>
             <InfoValue>
-              <DropDown
+              <DropDown2
                 optionss={["창업", "포트폴리오", "취업", "공모전"]}
                 value={purpose}
                 onChange={(value) => setPurpose(value)}
+                // 💡 현재 열려있는 드롭다운이 'field'인지 판별해서 알려줌 (true/false)
+                isOpen={activeDropdown === "purpose"}
+                // 💡 토글 함수: 내가 켜지면 부모에게 'field'라고 알리고, 이미 켜져있었으면 닫음("")
+                onToggle={(e) => {
+                  if (e) e.stopPropagation();
+                  setActiveDropdown(
+                    activeDropdown === "purpose" ? "" : "purpose"
+                  );
+                }}
               />
             </InfoValue>
           </InfoRow>
@@ -351,7 +471,7 @@ function WriteGather() {
         <Title name="내용" />
         <div style={{ position: "relative" }}>
           <TextArea
-            placeholder="2025년 10월 이내 완성을 목표로 합니다."
+            placeholder="200자 이내의 내용을 입력해 주세요."
             maxLength={200}
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -366,7 +486,7 @@ function WriteGather() {
               color: "#9ca3af",
             }}
           >
-            {content.length}/200자
+            {content.length}/200
           </span>
         </div>
       </Card>
@@ -377,7 +497,7 @@ function WriteGather() {
       {/* 업로드 버튼 */}
       <SubmitButton
         className={isReady ? "ready" : ""}
-        onClick={() => isReady && navigate("/writeend")}
+        onClick={() => isReady && dataSend()}
       >
         업로드
       </SubmitButton>
