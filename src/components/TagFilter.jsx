@@ -149,14 +149,14 @@ const CancelButton = styled(BaseButton)`
 function TagFilter({ isOpen, onClose, onApply, initiallySelected = [] }) {
   // 실제 프로젝트 스펙에 완전히 맞춘 태그 리스트
   const defaultTags = [
-    "리더",
-    "피드백 요정",
-    "아이디어 뱅크",
-    "꼼꼼한 마감파",
-    "포토샵장인",
-    "계획형플래너",
-    "소통왕",
-    "속전속결",
+    "#리더",
+    "#피드백 요정",
+    "#아이디어 뱅크",
+    "#꼼꼼한 마감파",
+    "#포토샵장인",
+    "#계획형플래너",
+    "#소통왕",
+    "#속전속결",
   ];
 
   const [selectedTags, setSelectedTags] = useState([]);
@@ -200,7 +200,8 @@ function TagFilter({ isOpen, onClose, onApply, initiallySelected = [] }) {
                   checked={isChecked}
                   onChange={() => handleTagToggle(tag)}
                 />
-                <CustomCheckbox $checked={isChecked} />#{tag}
+                <CustomCheckbox $checked={isChecked} />
+                {tag}
               </CheckLabel>
             );
           })}

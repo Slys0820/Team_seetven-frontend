@@ -196,24 +196,22 @@ function Post() {
   const [loading, setLoading] = useState(true);
   const [isApplied, setIsApplied] = useState(false);
 
-  // 1. 모집글 상세 조회 API (GET) + 명세서 맞춤 예외 처리 추가
+  // 1. 모집글 상세 조회 API (GET)
   useEffect(() => {
     const fetchPostData = async () => {
       setLoading(true);
       try {
         const response = await instance.get(`/api/posts/${postId}`);
-
-        if (response.data) {
-          setPost(response.data);
-          setIsApplied(response.data.hasApplied ?? false);
+        if (response.data && response.data.isSuccess) {
+          const postData = response.data.result;
+          setPost(postData);
+          setIsApplied(postData.hasApplied ?? false);
         } else {
           setPost(null);
         }
       } catch (error) {
         if (error.response) {
           const status = error.response.status;
-
-          // 💡 401 에러 핸들링 (토큰 만료 / 없음)
           if (status === 401) {
             const serverMessage =
               error.response.data?.message || "인증이 필요합니다.";
@@ -222,37 +220,25 @@ function Post() {
             navigate("/login");
             return;
           }
-
-          // 💡 404 에러 핸들링 (잘못된 postId / 존재하지 않는 모집글)
           if (status === 404) {
-            const serverMessage =
-              error.response.data?.message || "존재하지 않는 모집글입니다.";
-            alert(serverMessage);
-            setPost(null);
+            alert("존재하지 않는 모집글입니다.");
             navigate("/wholepost");
             return;
           }
         }
-
-        console.error("데이터 로딩 실패:", error);
         setPost(null);
       } finally {
         setLoading(false);
       }
     };
-
-    if (postId) {
-      fetchPostData();
-    }
+    if (postId) fetchPostData();
   }, [postId, navigate]);
 
   // 2. 예외 처리용 타이머 (데이터가 없을 때 리다이렉트 보호막)
   useEffect(() => {
     let timer;
     if (!post && !loading) {
-      timer = setTimeout(() => {
-        navigate("/wholepost");
-      }, 1500);
+      timer = setTimeout(() => navigate("/wholepost"), 1500);
     }
     return () => clearTimeout(timer);
   }, [post, loading, navigate]);
@@ -263,75 +249,51 @@ function Post() {
       !window.confirm(
         "정말 지원하시겠습니까? 지원한 후에는 취소할 수 없습니다."
       )
-    ) {
+    )
       return;
-    }
 
     try {
       const response = await instance.post(`/api/posts/${postId}/apply`, {});
-
       if (response.status === 200 || response.status === 201) {
         alert("지원이 완료되었습니다!");
         setIsApplied(true);
       }
     } catch (error) {
-      console.error("지원하기 실패:", error);
-
       if (error.response) {
-        // 💡 지원 요청 도중 토큰이 만료된 경우 (401)
         if (error.response.status === 401) {
-          const serverMessage =
-            error.response.data?.message || "인증이 필요합니다.";
-          alert(serverMessage);
+          alert("인증이 필요합니다.");
           localStorage.removeItem("token");
           navigate("/login");
           return;
         }
-
-        if (error.response.data?.message) {
-          alert(`지원 실패: ${error.response.data.message}`);
+        if (error.response.status === 403) {
+          alert("이미 지원한 모집글입니다.");
+          setIsApplied(true);
           return;
         }
+        alert(
+          `지원 실패: ${error.response.data?.message || "오류가 발생했습니다."}`
+        );
       }
-
-      alert("지원 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
     }
   };
 
-  // 4. 로딩 상태 렌더링
-  if (loading) {
+  if (loading)
     return (
       <Box>
         <PurpleHeader title="모집 상세 정보" root="/wholepost" />
-        <ContentBox>
-          <p
-            style={{ textAlign: "center", color: "#7063e3", marginTop: "40px" }}
-          >
-            데이터 불러오는 중입니다...
-          </p>
-        </ContentBox>
+        <p style={{ textAlign: "center", marginTop: "40px" }}>로딩 중...</p>
       </Box>
     );
-  }
-
-  // 5. 에러 및 데이터 부재 예외 렌더링
-  if (!post) {
+  if (!post)
     return (
       <Box>
         <PurpleHeader title="모집 상세 정보" root="/wholepost" />
-        <ContentBox style={{ textAlign: "center", padding: "40px 0" }}>
-          <p style={{ fontWeight: "bold", color: "#1f2937" }}>
-            존재하지 않거나 삭제된 게시글입니다.
-          </p>
-          <p
-            style={{ fontSize: "0.85rem", color: "#9ca3af", marginTop: "10px" }}
-          >
-            잠시 후 전체 모집 글 페이지로 이동합니다.
-          </p>
-        </ContentBox>
+        <p style={{ textAlign: "center", marginTop: "40px" }}>
+          게시글이 없습니다.
+        </p>
       </Box>
     );
-  }
 
   const isClosed = post.postStatus === "모집마감";
 
@@ -339,108 +301,58 @@ function Post() {
   return (
     <Box>
       <PurpleHeader title="모집 상세 정보" root={-1} />
-
       <ContentBox>
-        <CategoryTag>{post.category} • 아이디어</CategoryTag>
+        <CategoryTag>{post.category}</CategoryTag>
         <Title>{post.title}</Title>
-
         <MetaInfoRow>
           <div className="left-meta">
-            <span>
-              <img src="../person.svg" alt="유저" /> {post.authorName}
-            </span>
+            <span>{post.writerName}</span>
             <span>•</span>
-            <span>
-              <img src="../calender.svg" alt="날짜" /> {post.createdAt}
-            </span>
+            <span>{post.createdAt.split("T")[0]}</span>
           </div>
         </MetaInfoRow>
-
         <Divider />
-
         <SectionTitle>모집 정보</SectionTitle>
         <InfoTableBox>
           <TableRow>
-            <div className="label-group">
-              <div className="icon-bg">
-                <img src="../speaker.svg" alt="공고" />
-              </div>
-              <span>지원 공고</span>
-            </div>
+            <div className="label-group">지원 공고</div>
             <a
               className="link"
-              href={post.announcementLink}
+              href={post.applicationUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
-              {post.announcementLink}
+              {post.applicationUrl}
             </a>
           </TableRow>
           <TableRow>
-            <div className="label-group">
-              <div className="icon-bg">
-                <img src="../layers.svg" alt="분야" />
-              </div>
-              <span>모집 분야</span>
-            </div>
-            <div className="value">{post.category} · 아이디어</div>
+            <div className="label-group">모집 분야</div>
+            <div className="value">{post.category}</div>
           </TableRow>
           <TableRow>
-            <div className="label-group">
-              <div className="icon-bg">
-                <img src="../calender_check.svg" alt="마감일" />
-              </div>
-              <span>모집 마감일</span>
-            </div>
-            <div className="value">{post.dueDate}</div>
+            <div className="label-group">마감일</div>
+            <div className="value">{post.recruitDeadline.split("T")[0]}</div>
           </TableRow>
           <TableRow>
-            <div className="label-group">
-              <div className="icon-bg">
-                <img src="../persons.svg" alt="인원" />
-              </div>
-              <span>모집 인원</span>
-            </div>
-            <div className="value">{post.recruitmentCount}명</div>
+            <div className="label-group">모집 인원</div>
+            <div className="value">{post.recruitCount}</div>
           </TableRow>
           <TableRow>
-            <div className="label-group">
-              <div className="icon-bg">
-                <img src="../desktop_mac.svg" alt="방식" />
-              </div>
-              <span>활동 방식</span>
-            </div>
-            <div className="value">{post.activityMethod}</div>
+            <div className="label-group">활동 방식</div>
+            <div className="value">{post.activityType}</div>
           </TableRow>
           <TableRow>
-            <div className="label-group">
-              <div className="icon-bg">
-                <img src="../flag.svg" alt="목적" />
-              </div>
-              <span>활동 목적</span>
-            </div>
+            <div className="label-group">활동 목적</div>
             <div className="value">{post.activityPurpose}</div>
           </TableRow>
         </InfoTableBox>
-
         <SectionTitle>내용</SectionTitle>
         <InfoTableBox>
           <ContentDetailBox>
-            <img
-              src="../format_quote (2).svg"
-              className="quote-start"
-              alt="따옴표 시작"
-            />
             <div className="text-content">{post.content}</div>
-            <img
-              src="../format_quote (1).svg"
-              className="quote-end"
-              alt="따옴표 끝"
-            />
           </ContentDetailBox>
         </InfoTableBox>
       </ContentBox>
-
       <FixedBottomBar>
         <FullApplyButton
           disabled={isClosed || isApplied}

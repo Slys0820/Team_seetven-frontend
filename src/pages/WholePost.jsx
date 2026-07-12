@@ -101,14 +101,24 @@ function WholePost() {
   // 💡 백엔드에서 통째로 받아올 전체 게시글 상태
   const [allPosts, setAllPosts] = useState([]);
 
-  // 🚀 백엔드 API 연동 (`GET /api/posts`) + 401 토큰 만료 예외 처리 추가
+  // 🚀 백엔드 API 연동 (`GET /api/posts`) + 예외 처리 및 타입 안전장치 강화
   useEffect(() => {
     const fetchAllPosts = async () => {
       try {
         const response = await instance.get("/api/posts");
-        // 명세서에 적힌 대로 response.data.result 자체가 리스트 배열입니다.
+
         if (response.data && response.data.isSuccess) {
-          setAllPosts(response.data.result || []);
+          const rawData = response.data.result;
+
+          // 💡 result 자체가 배열이 맞는지 한 번 더 체크하는 안전장치
+          if (Array.isArray(rawData)) {
+            setAllPosts(rawData);
+          } else if (rawData && Array.isArray(rawData.posts)) {
+            // 만약 result.posts 구조로 내려올 경우를 대비한 유연한 예외 처리
+            setAllPosts(rawData.posts);
+          } else {
+            setAllPosts([]);
+          }
         }
       } catch (error) {
         // 💡 401 에러 핸들링 (토큰 없음 / 만료 대응)
@@ -134,10 +144,11 @@ function WholePost() {
     (post) => post.category && post.category.includes(activeTab)
   );
 
-  // 날짜 형식 이쁘게 잘라주는 헬퍼 함수 ("2026-07-01T18:30:00" -> "2026-07-01")
+  // 날짜 형식 예외 처리 강화 ("2026-07-05"와 "2026-07-05T18:30:00" 둘 다 안전하게 대응)
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    return dateString.split("T")[0];
+    // 문자열에 'T'가 포함되어 있을 때만 잘라주고, 없으면 그대로 반환합니다.
+    return dateString.includes("T") ? dateString.split("T")[0] : dateString;
   };
 
   return (
