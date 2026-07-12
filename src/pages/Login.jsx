@@ -402,7 +402,7 @@ function Login() {
           <SignUpLink onClick={() => navigate("/signup")}>회원가입</SignUpLink>
 
           {/*  [개발용  임시 스타일] */}
-          <DevAdminPanel>
+          {/* <DevAdminPanel>
             <h4>🛠️ 해커톤 라우트 이동기 (개발 테스트용)</h4>
             <div className="btn-group">
               <button onClick={() => navigate("/main")}>🏠 메인</button>
@@ -422,7 +422,7 @@ function Login() {
             >
               * 계정: test@naver.com / 비밀번호: 1234
             </div>
-          </DevAdminPanel>
+          </DevAdminPanel> */}
         </FormContainer>
       </Box>
     </>
