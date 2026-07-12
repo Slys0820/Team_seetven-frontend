@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios.jsx";
-
+// 1차 수정
 const Box = styled.div`
   display: flex;
   justify-content: center;
