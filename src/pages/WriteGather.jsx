@@ -4,7 +4,7 @@ import { useState } from "react";
 import PurpleHeader from "../components/PurpleHeader";
 import DropDown from "../components/DropDown";
 import DropDown2 from "../components/DropDown2";
-import axios from "axios";
+import instance from "../api/axios";
 
 // ───────── 공통 스타일 ─────────
 
@@ -250,6 +250,7 @@ function WriteGather() {
 
   // 7가지 조건 모두 충족 시 true
   const isReady =
+    titlet &&
     postUrl &&
     field &&
     deadline &&
@@ -261,18 +262,21 @@ function WriteGather() {
 
   const dataSend = async () => {
     try {
+      const formattedDeadline = deadline.replaceAll("/", "-");
+
       const requestBody = {
         title: titlet, // ⚠️ 임시 제목 (제목 State가 있다면 매핑)
         applicationUrl: postUrl, // useState("") 값 연동
         category: field, // useState("") 값 연동
-        recruitDeadline: deadline, // useState("") 값 연동
-        recruitCount: Number(headcount), // 💡 숫자로 변환해서 전달 (명세서 규격 맞춤)
+        recruitDeadline: formattedDeadline, // useState("") 값 연동
+        recruitCount: parseInt(headcount, 10) || 1, // 💡 숫자로 변환해서 전달 (명세서 규격 맞춤)
         activityType: activityType || "미정", // 값이 없으면 기본값 세팅
         activityPurpose: purpose || "미정", // 값이 없으면 기본값 세팅
         content: content, // useState("") 값 연동
       };
 
-      const response = await axios.post("/api/posts", requestBody);
+      const response = await instance.post("/api/posts", requestBody);
+
       if (response.data && response.data.isSuccess) {
         alert("공고가 성공적으로 등록되었습니다! 🎉");
         navigate("/writeend"); // 부모 컴포넌트에 정의된 navigate 실행
@@ -282,17 +286,45 @@ function WriteGather() {
     } catch (error) {
       if (error.response) {
         const status = error.response.status;
-        const serverMessage = error.response.data?.message;
+        const serverData = error.response.data;
 
-        if (status === 400) {
-          alert("입력하신 데이터 형식이 맞지 않습니다. (날짜나 인원수 확인)");
-        } else if (status === 403) {
-          alert(serverMessage || "접근 권한이 없습니다.");
+        console.error("서버 에러 원본 객체:", serverData);
+
+        // 🔍 1. 백엔드가 에러가 난 필드 목록(errors 배열 등)을 줬을 경우 싹 다 긁어모으기
+        let errorMessage = "";
+
+        if (serverData.errors && Array.isArray(serverData.errors)) {
+          // 스프링 표준 에러 포맷 처리 (field와 defaultMessage 추출)
+          errorMessage = serverData.errors
+            .map(
+              (err) =>
+                `• [${err.field}]: ${err.defaultMessage || "값이 잘못됨"}`
+            )
+            .join("\n");
+        } else if (typeof serverData.result === "object") {
+          // 백엔드가 custom result 안에 에러를 넣어놨을 경우
+          errorMessage = JSON.stringify(serverData.result, null, 2);
         } else {
-          alert(`서버 에러가 발생했습니다. (오류 코드: ${status})`);
+          // 그 외 일반적인 메시지 추출
+          errorMessage = serverData.message || "알 수 없는 형식 오류";
+        }
+
+        // 🚨 2. 어떤 항목이 불일치인지 alert창으로 띄우기
+        if (status === 400) {
+          alert(
+            `❌ 백엔드 데이터 검증 실패 (400 Bad Request)\n\n` +
+              `이 항목들을 수정해야 합니다:\n${errorMessage}\n\n` +
+              `👉 콘솔창(F12)을 열면 더 상세한 서버 로그가 있습니다.`
+          );
+        } else {
+          alert(
+            `서버 에러가 발생했습니다. (오류 코드: ${status})\n사유: ${serverData.message || "없음"}`
+          );
         }
       } else {
-        alert("네트워크 연결을 확인해 주세요.");
+        alert(
+          "네트워크 연결이 원활하지 않습니다. 서버가 켜져있는지 확인해주세요."
+        );
       }
     }
   };
@@ -364,7 +396,7 @@ function WriteGather() {
                   "네이밍/슬로건",
                   "경제/금융",
                   "영상/콘텐츠",
-                  "문학/시니리오",
+                  "문학/시나리오",
                   "기타",
                 ]}
                 value={field}
@@ -402,7 +434,7 @@ function WriteGather() {
             <InfoLabel>모집 인원</InfoLabel>
             <InfoValue>
               <DropDown2
-                optionss={["1명", "2명", "3명", "4명", "5명"]}
+                optionss={["2명", "3명", "4명", "5명", "6명", "상관없음"]}
                 value={headcount}
                 onChange={(value) => setHeadcount(value)}
 
@@ -425,7 +457,7 @@ function WriteGather() {
             <InfoLabel>활동 방식</InfoLabel>
             <InfoValue>
               <DropDown2
-                optionss={["온라인", "오프라인", "혼합"]}
+                optionss={["대면", "비대면", "혼합"]}
                 value={activityType}
                 onChange={(value) => setActivityType(value)}
 
@@ -448,7 +480,7 @@ function WriteGather() {
             <InfoLabel>활동 목적</InfoLabel>
             <InfoValue>
               <DropDown2
-                optionss={["창업", "포트폴리오", "취업", "공모전"]}
+                optionss={["공모전 입상", "포트폴리오", "프로젝트 경험"]}
                 value={purpose}
                 onChange={(value) => setPurpose(value)}
                 // 💡 현재 열려있는 드롭다운이 'field'인지 판별해서 알려줌 (true/false)

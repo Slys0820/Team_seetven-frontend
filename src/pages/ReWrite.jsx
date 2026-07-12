@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PurpleHeaderNoBack from "../components/PurpleHeaderNoBack";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import instance from "../api/axios";
 
 const InputBox = styled.input`
   width: 100%;
@@ -206,7 +207,7 @@ function ReWrite() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get("/api/profile/me"); // 백엔드에 GET 요청
+        const response = await instance.get("/api/profile/me"); // 백엔드에 GET 요청
         const data = response.data;
 
         // 💡 중요: 서버에서 받아온 기존 정보로 useState들을 미리 채워줍니다!
@@ -238,7 +239,7 @@ function ReWrite() {
       };
 
       // 백엔드에 PATCH 요청을 보내서 갱신
-      await axios.patch("/api/profile", updatedData);
+      await instance.patch("/api/profile", updatedData);
       alert("수정이 완료되었습니다!");
       // 💡 [정답!] 서버 저장에 성공했으므로, 수정 모드를 풀고 다시 '조회 모드'로 화면을 돌려놓습니다.
       navigate("/main");

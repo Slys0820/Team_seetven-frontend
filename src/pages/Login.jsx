@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import instance from "../api/axios.jsx";
+import instance from "../api/axios";
 
 const Box = styled.div`
   display: flex;
@@ -265,7 +265,6 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   // 💡 비동기 통신을 위해 async 키워드를 붙입니다.
   const handleLogin = async () => {
-    console.log("현재 주입된 백엔드 주소:", import.meta.env.VITE_API_URL);
     // 1. 프론트엔드 자체 유효성 검사 (빈 칸 입력 방지)
     if (email.trim() === "" || password.trim() === "") {
       setIsError(true);
@@ -275,7 +274,7 @@ function Login() {
 
     try {
       // 💡 2. 메소드 POST로 명세서 형식 맞춰 전송
-      const response = await instance.post("/api/login", {
+      const response = await instance.post("/api/auth/login", {
         email: email,
         password: password,
         autoLogin: autoLogin,

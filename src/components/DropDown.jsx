@@ -135,7 +135,7 @@ function DropDown({ optionss, value, onChange, isOpen, onToggle }) {
                 : "none",
               transition: "filter 0.2s", // 부드러운 변화
             }}
-            src="Vector (6).svg"
+            src="Vectorr.svg"
             alt="화살표"
           />
         </Arrow>
