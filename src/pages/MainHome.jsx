@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
 import ProfileCard from "../components/ProfileCard";
-import { normalizeProfileData } from "../utils/normalizeProfileData";
 
 // --- [스타일 컴포넌트 구역] ---
 const HomeContainer = styled.div`
@@ -267,7 +266,7 @@ function MainHome() {
     try {
       const response = await instance.get("/api/profile/me");
       console.log("백엔드가 던져준 진짜 데이터 원본:", response.data);
-      setProfileData(normalizeProfileData(response.data));
+      setProfileData(response.data);
     } catch (error) {
       console.error("기존 프로필을 불러오지 못했습니다.", error);
     }
