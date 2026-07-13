@@ -101,14 +101,15 @@ const CardViewButton = styled.button`
  * @param {Array} collaborationTags - 협업 태그 목록
  * @param {string} buttonLabel - '수락하기', '수정하기' 등 상세 카드 버튼에 표시될 텍스트
  * @param {function} onCardClick - 카드보기 버튼 클릭 시 부모에서 실행할 함수
+ * @param {object} profileData - 상세 카드에 전달할 데이터
  */
 function PersonInfo({
   nametwo,
   profileImg,
   collaborationTags = [],
+  buttonLabel = "수락하기",
   onCardClick,
   profileData,
-  buttonLabel = "수락하기",
 }) {
   const displayTags = collaborationTags.slice(0, 2);
   const [isOpen, setIsOpen] = useState(false);
@@ -136,8 +137,14 @@ function PersonInfo({
           </TagRow>
         </InfoContent>
 
-        {/* 📌 모달 로직 삭제, 단순히 onCardClick만 호출 */}
-        <CardViewButton onClick={onCardClick}>카드보기</CardViewButton>
+        <CardViewButton
+          onClick={() => {
+            if (onCardClick) onCardClick();
+            setIsOpen(true);
+          }}
+        >
+          카드보기
+        </CardViewButton>
       </CardWrapper>
 
       {isOpen && (
@@ -145,7 +152,7 @@ function PersonInfo({
           <CardWrapperInner onClick={(e) => e.stopPropagation()}>
             <ProfileCard
               profileData={profileData}
-              name={buttonLabel} // 부모에서 넘겨준 버튼 텍스트 사용
+              name={buttonLabel}
               xClick={() => setIsOpen(false)}
               onClick={() => {
                 setIsOpen(false);
