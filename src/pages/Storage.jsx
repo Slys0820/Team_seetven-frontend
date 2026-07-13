@@ -72,7 +72,7 @@ function Storage() {
   // 📌 1. 지원자 상세 정보 가져오기 함수 (클릭 시 호출)
   const fetchApplicantDetail = async (applicationId) => {
     try {
-      const response = await instance.get(`/api/applicants/${applicationId}`);
+      const response = await instance.get(`/api/applications/${applicationId}`);
       if (response.data?.isSuccess) {
         // 성공 시 상태 업데이트 -> 자동으로 ModalOverlay가 뜹니다.
         setSelectedApplicant(response.data.result);
