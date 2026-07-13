@@ -201,6 +201,7 @@ const IntroductionText = styled.div`
 
 // 컴포넌트 위는 다
 const ProfileCard = ({ onClick, name, xClick, profileData }) => {
+  console.log("현재 ProfileCard가 받은 데이터:", profileData);
   // 하단버튼기능, 하단버튼 이름, x버튼 기능
   {
     /* 
