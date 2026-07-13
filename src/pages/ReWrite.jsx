@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import PurpleHeaderNoBack from "../components/PurpleHeaderNoBack";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import instance from "../api/axios";
 
 const InputBox = styled.input`
@@ -208,27 +207,42 @@ function ReWrite() {
     const fetchProfileData = async () => {
       try {
         const response = await instance.get("/api/profile/me"); // 백엔드에 GET 요청
-        const data = response.data;
+        console.log("백엔드가 던져준 진짜 데이터 원본:", response.data);
+        const data = response.data.result || response.data;
 
         // 💡 중요: 서버에서 받아온 기존 정보로 useState들을 미리 채워줍니다!
         setEmail(data.email);
-        setIntroduction(data.selfIntroduction);
-        setSelectedTendency(data.collaborationTags);
-        setEmail(data.email);
+        setIntroduction(data.selfIntroduction ?? "");
+        setSelectedTendency(data.collaborationTags ?? []);
+        setEmail(data.contactEmail);
         setName(data.name);
         setGender(data.gender);
 
-        // 자격증 정보가 문자열 배열(["ADsP"])로 온다면 객체 배열([{id, text}])로 변환해서 채우기
-        const mappedCareers = data.certificates.map((text, index) => ({
-          id: Date.now() + index,
-          text: text,
-        }));
-        setCareers(mappedCareers);
+        // 🟢 컴파일러가 대만족하는 정상 코드
+        const certificateList = data.certificates?.recentThree;
+        console.log(certificateList);
+        if (certificateList && Array.isArray(certificateList)) {
+          // 1. 변수를 생성하고 가공합니다.
+          const mappedCareers = certificateList.map((text, index) => ({
+            id: Date.now() + index,
+            text: text,
+          }));
+
+          console.log(mappedCareers);
+
+          // 2. 🚨 [이게 핵심!] 변수가 살아있는 이 상자 { } 안에서 바로 세팅해 줍니다!
+          setCareers(mappedCareers);
+        } else {
+          // 데이터가 없거나 형식이 다르면 안전하게 빈 배열 처리
+          setCareers([]);
+        }
       } catch (error) {
         console.error("기존 프로필을 불러오지 못했습니다.", error);
       }
     };
+    fetchProfileData();
   }, []); // 딱 1번만 실행됨
+
   // 2️⃣ [PATCH] 사용자가 수정한 후 [저장] 버튼을 누를 때 실행되는 함수
   const handleSave = async () => {
     try {
@@ -261,13 +275,14 @@ function ReWrite() {
   ];
 
   const handleSelect = (item) => {
-    if (selectedTendency.includes(item)) {
+    const currentTendency = selectedTendency ?? [];
+    if (currentTendency.includes(item)) {
       // 이미 선택된 거면 해제
-      setSelectedTendency(selectedTendency.filter((i) => i !== item));
+      setSelectedTendency(currentTendency.filter((i) => i !== item));
     } else {
       // 2개 미만일 때만 추가
-      if (selectedTendency.length < 2) {
-        setSelectedTendency([...selectedTendency, item]);
+      if (currentTendency.length < 2) {
+        setSelectedTendency([...currentTendency, item]);
       }
     }
   };
@@ -362,7 +377,7 @@ function ReWrite() {
 
         <div>
           {tendencies.map((item) => {
-            const isSelected = selectedTendency.includes(item);
+            const isSelected = selectedTendency?.includes(item);
             return (
               <button
                 key={item}
@@ -383,7 +398,7 @@ function ReWrite() {
                   /* 💡 조회 모드(isEdit=false)일 때는 마우스 커서를 일반 화살표로 고정 */
                   cursor: !isEdit
                     ? "default"
-                    : selectedTendency.length === 2 && !isSelected
+                    : selectedTendency?.length === 2 && !isSelected
                       ? "not-allowed"
                       : "pointer",
                   transition: "all 0.2s ease",
@@ -429,19 +444,18 @@ function ReWrite() {
         )}
 
         {/* 등록된 자격증 뱃지 노출 영역 */}
-        {careers.length > 0 && (
-          <TagContainer style={{ marginTop: isEdit ? "12px" : "4px" }}>
-            {careers.map((item) => (
-              <Tag key={item.id}>
-                {item.text}
-                {/* 💡 수정 모드일 때만 삭제(X) 버튼을 보여줌 */}
-                {isEdit && (
-                  <button onClick={() => handleRemoveCareer(item.id)}>×</button>
-                )}
-              </Tag>
-            ))}
-          </TagContainer>
-        )}
+
+        <TagContainer style={{ marginTop: isEdit ? "12px" : "4px" }}>
+          {careers.map((item) => (
+            <Tag key={item.id}>
+              {item.text}
+              {/* 💡 수정 모드일 때만 삭제(X) 버튼을 보여줌 */}
+              {isEdit && (
+                <button onClick={() => handleRemoveCareer(item.id)}>×</button>
+              )}
+            </Tag>
+          ))}
+        </TagContainer>
 
         <Line style={{ marginTop: "20px" }}></Line>
 
@@ -477,7 +491,7 @@ function ReWrite() {
                 value={intruduction}
                 onChange={(e) => setIntroduction(e.target.value)}
               />
-              <WordCounter>{intruduction.length}/300자</WordCounter>
+              <WordCounter>{intruduction?.length ?? 0}/300자</WordCounter>
             </>
           ) : (
             // ❌ 조회 모드일 때는 스크롤이 가능한 일반 뷰용 div 텍스트 노출 (textarea 대신)
@@ -503,7 +517,9 @@ function ReWrite() {
           <SubmitButton
             onClick={handleSave}
             className={
-              intruduction && selectedTendency.length === 2 ? "ready" : ""
+              intruduction && (selectedTendency?.length ?? 0) === 2
+                ? "ready"
+                : ""
             }
           >
             저장
