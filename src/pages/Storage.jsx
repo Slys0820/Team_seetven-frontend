@@ -69,12 +69,24 @@ function Storage() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [selectedApplicant, setSelectedApplicant] = useState(null); // 📌 상세 보기용 상태
 
+  // 📌 1. 지원자 상세 정보 가져오기 함수 (클릭 시 호출)
+  const fetchApplicantDetail = async (applicationId) => {
+    try {
+      const response = await instance.get(`/api/applications/${applicationId}`);
+      if (response.data?.isSuccess) {
+        // 성공 시 상태 업데이트 -> 자동으로 ModalOverlay가 뜹니다.
+        setSelectedApplicant(response.data.result);
+      }
+    } catch (error) {
+      console.error("상세 정보 로드 실패:", error);
+      alert("프로필 정보를 불러올 수 없습니다.");
+    }
+  };
   const handleDecision = async (applicationId, decision) => {
     try {
-      const response = await instance.patch(
-        `/api/applications/${applicationId}`,
-        { decision }
-      );
+      const response = await instance.patch(`/api/posts/{postId}/applicants`, {
+        decision,
+      });
       if (response.data?.isSuccess) {
         alert(
           decision === "ACCEPT"
@@ -171,14 +183,18 @@ function Storage() {
             {applicants.map((user) => (
               <PersonInfo
                 key={user.applicationId}
-                {...user}
-                onClick={() => setSelectedApplicant(user)}
+                nametwo={user.name}
+                collaborationTags={user.tags || []}
+                buttonLabel="수락하기"
+                // 📌 버튼 클릭 시 상세 정보 API 요청
+                onCardClick={() => fetchApplicantDetail(user.applicationId)}
               />
             ))}
           </>
         )}
       </ListContainer>
 
+      {/* 📌 모달 렌더링 (selectedApplicant가 있을 때만 뜸) */}
       {selectedApplicant && (
         <ModalOverlay>
           <ProfileCard
