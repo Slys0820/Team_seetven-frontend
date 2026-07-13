@@ -413,7 +413,7 @@ function Storage() {
                   <TagRow>
                     {activeFilters.map((tag) => (
                       <ActiveTagChip key={tag}>
-                        #{tag}
+                        {tag}
                         <button onClick={() => handleRemoveTag(tag)}>✕</button>
                       </ActiveTagChip>
                     ))}

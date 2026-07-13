@@ -15,6 +15,12 @@ const Box = styled.div`
   box-sizing: border-box;
   overflow-x: hidden;
 
+  /* 배경 이미지 추가 */
+  background-image: url("./background.svg");
+  background-size: cover; /* 화면을 꽉 채우게 */
+  background-position: center; /* 이미지 중앙 정렬 */
+  background-repeat: no-repeat; /* 반복 방지 */
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -396,7 +402,7 @@ function Login() {
           <SignUpLink onClick={() => navigate("/signup")}>회원가입</SignUpLink>
 
           {/*  [개발용  임시 스타일] */}
-          <DevAdminPanel>
+          {/* <DevAdminPanel>
             <h4>🛠️ 해커톤 라우트 이동기 (개발 테스트용)</h4>
             <div className="btn-group">
               <button onClick={() => navigate("/main")}>🏠 메인</button>
@@ -416,7 +422,7 @@ function Login() {
             >
               * 계정: test@naver.com / 비밀번호: 1234
             </div>
-          </DevAdminPanel>
+          </DevAdminPanel> */}
         </FormContainer>
       </Box>
     </>
