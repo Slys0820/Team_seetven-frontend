@@ -6,9 +6,8 @@ import { Pagination, EffectCoverflow } from "swiper/modules";
 import "swiper/css/pagination";
 import "swiper/css/effect-coverflow";
 import "swiper/css";
-import { normalizeProfileData } from "../utils/normalizeProfileData";
 
-const CardContent = styled.div`
+const Array = styled.div`
   //두번째 페이지 스타일
   align-items: center;
   width: 100%;
@@ -221,27 +220,21 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
   const licenses = dummyLicenses;
 */
   }
-  const normalizedProfileData = normalizeProfileData(profileData);
-  const keywords = Array.isArray(normalizedProfileData.collaborationTags)
-    ? normalizedProfileData.collaborationTags
-    : [];
-  const licenses = Array.isArray(normalizedProfileData.certificates)
-    ? normalizedProfileData.certificates
-    : [];
-  const memberName = normalizedProfileData.name ?? "";
-  const major = normalizedProfileData.major ?? "";
-  const school = normalizedProfileData.school ?? "";
-  const email = normalizedProfileData.contactEmail ?? "";
-  const selfIntroduction = normalizedProfileData.selfIntroduction ?? "";
-  const grade = normalizedProfileData.grade ?? "";
-  const gradeLabel = grade ? `${grade}학년` : "";
+  const keywords = profileData?.collaborationTags ?? [];
+  const licenses = profileData?.certificates ?? [];
+  const memberName = profileData?.name ?? "";
+  const major = profileData?.major ?? "";
+  const school = profileData?.school ?? "";
+  const email = profileData?.contactEmail ?? "";
+  const selfIntroduction = profileData?.selfIntroduction ?? "";
+  const grade = profileData?.grade ?? "";
 
   const genderMap = {
     //남여 변환 용
     male: "남자",
     female: "여자",
   };
-  const gender = genderMap[normalizedProfileData.gender] ?? "";
+  const gender = genderMap[profileData?.gender] ?? "";
   // 💡 핵심 로직: 화면에 그려줄 자격증 배열 가공하기
   const renderLicenses = () => {
     // 1. 자격증이 4개 이하인 경우: 있는 그대로 전부 보여줌
@@ -350,7 +343,7 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
                 color: "#E3E3E3",
               }}
             >
-              {school} | {gradeLabel} | {gender}
+              {school} | {grade} | {gender}
             </p>
             {/* 태그 및 하단 버튼 */}
             <KeywordRow>
@@ -367,7 +360,7 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
           <div className="card-container" style={cardStyle}>
             {/* 자격증 및 수상이력, 자기소개 내용 구현 */}
             <CardLine />
-            <CardContent>
+            <Array>
               <XButton src="xx.png" alt="x버튼" onClick={xClick} />
 
               <div
@@ -411,7 +404,7 @@ const ProfileCard = ({ onClick, name, xClick, profileData }) => {
                 <Title>자기소개</Title>
               </div>
               <IntroductionText>{selfIntroduction}</IntroductionText>
-            </CardContent>
+            </Array>
             <NextButton onClick={onClick} name={name} />
             <Mail>
               <img
