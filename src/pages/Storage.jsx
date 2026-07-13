@@ -60,7 +60,7 @@ const ModalOverlay = styled.div`
   align-items: center;
   z-index: 1000;
 `;
-
+// 수정
 function Storage() {
   const navigate = useNavigate();
   const [mainTab, setMainTab] = useState("applied");
