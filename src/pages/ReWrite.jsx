@@ -221,7 +221,11 @@ function ReWrite() {
         // 🟢 컴파일러가 대만족하는 정상 코드
         const certificateList = data.certificates?.recentThree;
         console.log(certificateList);
-        if (certificateList && Array.isArray(certificateList)) {
+        if (
+          certificateList &&
+          (certificateList instanceof window.Array ||
+            certificateList instanceof Array)
+        ) {
           // 1. 변수를 생성하고 가공합니다.
           const mappedCareers = certificateList.map((text, index) => ({
             id: Date.now() + index,
