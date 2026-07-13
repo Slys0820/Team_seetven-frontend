@@ -347,7 +347,7 @@ function MainHome() {
               >
                 <IconBox>
                   <img
-                    src={`${process.env.PUBLIC_URL}/img/Mainimg/${cat.imgSrc}`}
+                    src={`${process.env.PUBLIC_URL}/img/MainImg/${cat.imgSrc}`}
                     alt={cat.name}
                     style={{ width: "24px", height: "24px" }}
                   />
