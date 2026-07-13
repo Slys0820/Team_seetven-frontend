@@ -402,7 +402,6 @@ function MainHome() {
         <CardOverlay onClick={() => setIsProfileOpen(false)}>
           <CardWrapperInner onClick={(e) => e.stopPropagation()}>
             <ProfileCard
-              profileData={profileData}
               name="수정하기"
               xClick={() => setIsProfileOpen(false)}
               onClick={() => navigate("/rewrite")}

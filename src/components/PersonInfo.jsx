@@ -96,60 +96,56 @@ const CardViewButton = styled.button`
 `;
 
 /**
- * @param {string} name - 지원자 이름
+ * @param {string} nametwo - 지원자 이름
  * @param {string} profileImg - 프로필 이미지 경로
- * @param {Array} collaborationTags - 📌 백엔드 변수명 반영 (기존 tags에서 변경)
- * @param {function} onCardClick - '카드보기' 버튼 클릭 시 동작할 부모 함수
+ * @param {Array} collaborationTags - 협업 태그 목록
+ * @param {string} buttonLabel - '수락하기', '수정하기' 등 상세 카드 버튼에 표시될 텍스트
+ * @param {function} onCardClick - 카드보기 버튼 클릭 시 부모에서 실행할 함수
  */
-function PersonInfo({ name, profileImg, collaborationTags = [], onCardClick }) {
-  // 안전장치: 유저당 태그는 최대 2개까지만 노출되도록 제한
+function PersonInfo({
+  nametwo,
+  profileImg,
+  collaborationTags = [],
+  onCardClick,
+  profileData,
+  buttonLabel = "수락하기",
+}) {
   const displayTags = collaborationTags.slice(0, 2);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
     <>
-      {/* 간략히 뜨는 지원자 정보 요약 박스 */}
       <CardWrapper>
-        {/* 프로필 이미지 구역 */}
         <ProfileWrapper>
           <ActualImage
             src={profileImg || "./BasicProfile.svg"}
-            alt={`${name} 프로필`}
+            alt={`${nametwo} 프로필`}
             onError={(e) => {
               e.target.src = "./BasicProfile.svg";
             }}
           />
         </ProfileWrapper>
 
-        {/* 정보 구역 */}
         <InfoContent>
-          <Name>{name}</Name>
+          <Name>{nametwo}</Name>
           <TagRow>
             {displayTags.map((tag, idx) => (
-              // 백엔드가 '#아이디' 형태로 주면 겹치지 않게, 없다면 붙여서 노출
               <Tag key={idx}>{tag.startsWith("#") ? tag : `# ${tag}`}</Tag>
             ))}
           </TagRow>
         </InfoContent>
 
-        {/* '카드보기' 버튼 클릭 시 상세 모달 팝업 열기 */}
-        <CardViewButton
-          onClick={() => {
-            if (onCardClick) onCardClick();
-            setIsOpen(true);
-          }}
-        >
-          카드보기
-        </CardViewButton>
+        {/* 📌 모달 로직 삭제, 단순히 onCardClick만 호출 */}
+        <CardViewButton onClick={onCardClick}>카드보기</CardViewButton>
       </CardWrapper>
 
-      {/* 카드보기 클릭 시 띄워줄 전체화면 오버레이 팝업 구역 (진짜 상세 프로필 카드) */}
       {isOpen && (
         <CardOverlay onClick={() => setIsOpen(false)}>
           <CardWrapperInner onClick={(e) => e.stopPropagation()}>
             <ProfileCard
-              name="수락하기"
+              profileData={profileData}
+              name={buttonLabel} // 부모에서 넘겨준 버튼 텍스트 사용
               xClick={() => setIsOpen(false)}
               onClick={() => {
                 setIsOpen(false);
