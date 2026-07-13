@@ -102,6 +102,9 @@ const InfoDot = styled.div`
   border-radius: 100%;
   background-color: #f2f1fb;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 // 항목 라벨 (ex. 지원공고, 모집분야)
@@ -139,7 +142,14 @@ const InputBox = styled.input`
   background-color: #fff;
 
   &::placeholder {
-    color: #9ca3af;
+    font-weight: 600;
+    font-style: Medium;
+    font-size: 0.7rem;
+    color: #acacac;
+
+    line-height: 140%;
+    letter-spacing: -1px;
+    vertical-align: middle;
   }
 
   &:focus {
@@ -184,9 +194,17 @@ const TextArea = styled.textarea`
   color: #1f2937;
   resize: none;
   background-color: #fff;
+  margin-bottom: 5%;
 
   &::placeholder {
-    color: #9ca3af;
+    font-weight: 700;
+    font-style: Medium;
+    font-size: 0.7rem;
+    color: #acacac;
+
+    line-height: 140%;
+    letter-spacing: -1px;
+    vertical-align: middle;
   }
 
   &:focus {
@@ -331,30 +349,52 @@ function WriteGather() {
 
   return (
     <PageWrapper>
-      <PurpleHeader title="모집 글 작성" root="/wholepost" />
+      <PurpleHeader
+        style={{ minHeight: "10vh" }}
+        title="모집 글 작성"
+        root="/wholepost"
+      />
       {/* 제목 카드 */}
       <Card style={{ marginTop: "5%", position: "relative" }}>
         <Title name="제목" />
-        <InputBox
-          placeholder="제목을 입력해 주세요."
-          value={titlet}
-          maxLength={30}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <div style={{ display: "flex", gap: "3px" }}>
+          <div
+            style={{
+              background: " #F2F1FB",
+              minWidth: "32px",
+              height: "32px",
+              borderRadius: " 4px",
+              gap: "10px",
+              angle: "0 deg",
+              opacity: "1",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <img src="Group.svg" alt="그룹" />
+          </div>
+          <InputBox
+            placeholder="제목을 입력해 주세요."
+            value={titlet}
+            maxLength={30}
+            onChange={(e) => setTitle(e.target.value)}
+          />
 
-        {/* 글자수 카운터 */}
-        <span
-          style={{
-            position: "absolute",
+          {/* 글자수 카운터 */}
+          <span
+            style={{
+              position: "absolute",
 
-            bottom: "13px",
-            right: "20px",
-            fontSize: "0.75rem",
-            color: "#9ca3af",
-          }}
-        >
-          {titlet.length}/30
-        </span>
+              bottom: "13px",
+              right: "20px",
+              fontSize: "0.75rem",
+              color: "#9ca3af",
+            }}
+          >
+            {titlet.length}/30
+          </span>
+        </div>
       </Card>
 
       {/* 모집 정보 카드 */}
@@ -364,7 +404,9 @@ function WriteGather() {
         <BCard>
           {/* 지원 공고 */}
           <InfoRow>
-            <InfoDot />
+            <InfoDot>
+              <img src="akak.svg" alt="스피커 폰" />
+            </InfoDot>
             <InfoLabel>지원 공고</InfoLabel>
             <InfoValue>
               <div style={{ position: "relative" }}>
@@ -385,7 +427,13 @@ function WriteGather() {
           <Line />
           {/* 모집 분야 */}
           <InfoRow>
-            <InfoDot />
+            <InfoDot>
+              <img
+                style={{ width: "14px", height: "14px" }}
+                src="layers.svg"
+                alt="레이어"
+              />
+            </InfoDot>
             <InfoLabel>모집 분야</InfoLabel>
             <InfoValue>
               <DropDown
@@ -415,7 +463,9 @@ function WriteGather() {
           <Line />
           {/* 모집 마감일 */}
           <InfoRow>
-            <InfoDot />
+            <InfoDot>
+              <img src="deadline.svg" alt="달력" />
+            </InfoDot>
             <InfoLabel>모집 마감일</InfoLabel>
             <InfoValue>
               <InputBox2
@@ -430,7 +480,9 @@ function WriteGather() {
           <Line />
           {/* 모집 인원 */}
           <InfoRow>
-            <InfoDot />
+            <InfoDot>
+              <img src="people_outline.svg" alt="사람들" />
+            </InfoDot>
             <InfoLabel>모집 인원</InfoLabel>
             <InfoValue>
               <DropDown2
@@ -453,7 +505,9 @@ function WriteGather() {
           <Line />
           {/* 활동 방식 */}
           <InfoRow>
-            <InfoDot />
+            <InfoDot>
+              <img src="desktop_mac.svg" alt="컴퓨터" />
+            </InfoDot>{" "}
             <InfoLabel>활동 방식</InfoLabel>
             <InfoValue>
               <DropDown2
@@ -476,7 +530,9 @@ function WriteGather() {
           <Line />
           {/* 활동 목적 */}
           <InfoRow>
-            <InfoDot />
+            <InfoDot>
+              <img src="outlined_flag.svg" alt="깃발" />
+            </InfoDot>
             <InfoLabel>활동 목적</InfoLabel>
             <InfoValue>
               <DropDown2
