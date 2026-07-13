@@ -104,7 +104,7 @@ const NextButton = ({ onClick, name }) => {
 const KeywordBox = styled.div`
   padding: 6px 16px;
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   border: 1px solid #b7b7b7;
 
   gap: 10px;
