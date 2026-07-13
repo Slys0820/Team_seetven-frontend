@@ -317,9 +317,9 @@ function MainHome() {
           <HeaderRow>
             <LogoText>STEPS</LogoText>
             <MyPageIconMock
-              onClick={() => {
-                getProfileData();
-                setIsProfileOpen(true);
+              onClick={async () => {
+                await getProfileData(); // 1. 데이터를 먼저 받아오고
+                setIsProfileOpen(true); // 2. 그 다음에 모달을 엽니다. (비동기 처리 주의)
               }}
             />
           </HeaderRow>
@@ -347,7 +347,7 @@ function MainHome() {
               >
                 <IconBox>
                   <img
-                    src={`/img/Mainimg/${cat.imgSrc}`}
+                    src={`${process.env.PUBLIC_URL}/img/MainImg/${cat.imgSrc}`}
                     alt={cat.name}
                     style={{ width: "24px", height: "24px" }}
                   />
@@ -401,6 +401,7 @@ function MainHome() {
         <CardOverlay onClick={() => setIsProfileOpen(false)}>
           <CardWrapperInner onClick={(e) => e.stopPropagation()}>
             <ProfileCard
+              profileData={profileData}
               name="수정하기"
               xClick={() => setIsProfileOpen(false)}
               onClick={() => navigate("/rewrite")}
